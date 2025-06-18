@@ -2,14 +2,735 @@
 <html lang="en">
 <head>
 <link rel="icon" href="hdghg.png" />
- <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hedge Flip Game</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hedgehog Bowling</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon-es@0.19.0/dist/cannon-es.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a4a6c, #1a3a6c);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        #header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #ddd;
+        }
+        
+        #game-stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ffcc00;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #ffcc00;
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            pointer-events: all;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 20px;
+            -webkit-appearance: none;
+            background: #555;
+            border-radius: 10px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ffcc00;
+            cursor: pointer;
+        }
+        
+        #roll-btn {
+            background: #ffcc00;
+            color: #1a2a6c;
+            border: none;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            pointer-events: all;
+        }
+        
+        #roll-btn:hover {
+            background: #ffd740;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        #roll-btn:disabled {
+            background: #777;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        #instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #ffcc00;
+            text-align: center;
+            max-width: 90%;
+            width: 500px;
+            pointer-events: all;
+        }
+        
+        #instructions h2 {
+            color: #ffcc00;
+            margin-bottom: 20px;
+        }
+        
+        #instructions ul {
+            text-align: left;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        
+        #instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        #start-btn {
+            background: #ffcc00;
+            color: #1a2a6c;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        #start-btn:hover {
+            background: #ffd740;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        #score-display {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ffcc00;
+            font-size: 1.2rem;
+        }
+        
+        #message {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 3px solid #ffcc00;
+            font-size: 1.5rem;
+            color: #ffcc00;
+            text-align: center;
+            display: none;
+            z-index: 20;
+            pointer-events: none;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-  <h1>🐾 Hedge Flip 🦔</h1>
-  <canvas id="gameCanvas"></canvas>
-  <script src="script.js"></script>
+    <div id="game-container">
+        <div id="game-ui">
+            <div id="header">
+                <h1>Hedgehog Bowling</h1>
+                <p class="subtitle">Tap the hedgehog to curl it into a ball, then aim and roll to knock down pins!</p>
+            </div>
+            
+            <div id="score-display">
+                Score: <span id="score">0</span> | Pins: <span id="pins-left">10</span>
+            </div>
+            
+            <div id="game-stats">
+                <div>Position: <span id="position-value">0°</span></div>
+                <div>Speed: <span id="speed-value">50%</span></div>
+            </div>
+            
+            <div id="controls">
+                <div class="control-group">
+                    <label>
+                        <span>Position:</span>
+                        <span id="position-display">0°</span>
+                    </label>
+                    <input type="range" id="position-slider" min="-45" max="45" value="0" step="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>
+                        <span>Speed:</span>
+                        <span id="speed-display">50%</span>
+                    </label>
+                    <input type="range" id="speed-slider" min="10" max="100" value="50" step="1">
+                </div>
+                
+                <button id="roll-btn" disabled>ROLL!</button>
+            </div>
+            
+            <div id="instructions">
+                <h2>How to Play</h2>
+                <ul>
+                    <li>Click/tap the hedgehog to make it curl into a ball</li>
+                    <li>Adjust the position slider to aim your shot</li>
+                    <li>Adjust the speed slider to control power</li>
+                    <li>Press ROLL! to send the hedgehog down the lane</li>
+                    <li>Knock down as many pins as possible to score points</li>
+                    <li>After each roll, click the hedgehog to reset it</li>
+                </ul>
+                <button id="start-btn">START GAME</button>
+            </div>
+            
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game variables
+        let scene, camera, renderer, world;
+        let hedgehog, hedgehogBody;
+        let pins = [];
+        let lane;
+        let gameStarted = false;
+        let isHedgehogCurled = false;
+        let score = 0;
+        let pinsStanding = 10;
+        
+        // Initialize the game
+        function init() {
+            // Set up Three.js scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB);
+            
+            // Set up camera
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 8, 12);
+            camera.lookAt(0, 0, 0);
+            
+            // Set up renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            document.getElementById('game-container').appendChild(renderer.domElement);
+            
+            // Set up physics world
+            world = new CANNON.World();
+            world.gravity.set(0, -9.82, 0);
+            world.broadphase = new CANNON.NaiveBroadphase();
+            world.solver.iterations = 10;
+            
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 15);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 1024;
+            directionalLight.shadow.mapSize.height = 1024;
+            scene.add(directionalLight);
+            
+            // Create the bowling lane
+            createLane();
+            
+            // Create hedgehog
+            createHedgehog();
+            
+            // Create bowling pins
+            createPins();
+            
+            // Add event listeners
+            setupEventListeners();
+            
+            // Start animation loop
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        // Create bowling lane
+        function createLane() {
+            // Lane floor
+            const laneGeometry = new THREE.BoxGeometry(5, 0.1, 20);
+            const laneMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x2E8B57,
+                roughness: 0.8
+            });
+            lane = new THREE.Mesh(laneGeometry, laneMaterial);
+            lane.position.y = -0.05;
+            lane.receiveShadow = true;
+            scene.add(lane);
+            
+            // Physics body for lane
+            const laneShape = new CANNON.Box(new CANNON.Vec3(2.5, 0.05, 10));
+            const laneBody = new CANNON.Body({ mass: 0 });
+            laneBody.addShape(laneShape);
+            laneBody.position.copy(lane.position);
+            world.addBody(laneBody);
+            
+            // Lane borders
+            const borderMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+            
+            // Left border
+            const leftBorderGeometry = new THREE.BoxGeometry(0.2, 0.3, 20);
+            const leftBorder = new THREE.Mesh(leftBorderGeometry, borderMaterial);
+            leftBorder.position.set(-2.6, 0.15, 0);
+            leftBorder.castShadow = true;
+            scene.add(leftBorder);
+            
+            // Right border
+            const rightBorderGeometry = new THREE.BoxGeometry(0.2, 0.3, 20);
+            const rightBorder = new THREE.Mesh(rightBorderGeometry, borderMaterial);
+            rightBorder.position.set(2.6, 0.15, 0);
+            rightBorder.castShadow = true;
+            scene.add(rightBorder);
+            
+            // Physics for borders
+            const borderShape = new CANNON.Box(new CANNON.Vec3(0.1, 0.15, 10));
+            
+            const leftBorderBody = new CANNON.Body({ mass: 0 });
+            leftBorderBody.addShape(borderShape);
+            leftBorderBody.position.copy(leftBorder.position);
+            world.addBody(leftBorderBody);
+            
+            const rightBorderBody = new CANNON.Body({ mass: 0 });
+            rightBorderBody.addShape(borderShape);
+            rightBorderBody.position.copy(rightBorder.position);
+            world.addBody(rightBorderBody);
+        }
+        
+        // Create the hedgehog character
+        function createHedgehog() {
+            // Body (sphere)
+            const bodyGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const bodyMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x8B4513,
+                roughness: 0.7
+            });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            
+            // Face
+            const faceMaterial = new THREE.MeshStandardMaterial({ color: 0xFFD700 });
+            const faceGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+            const face = new THREE.Mesh(faceGeometry, faceMaterial);
+            face.position.set(0, 0, 0.5);
+            body.add(face);
+            
+            // Eyes
+            const eyeGeometry = new THREE.SphereGeometry(0.05, 16, 16);
+            const eyeMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+            
+            const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            leftEye.position.set(0.15, 0.1, 0.65);
+            body.add(leftEye);
+            
+            const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+            rightEye.position.set(-0.15, 0.1, 0.65);
+            body.add(rightEye);
+            
+            // Spikes (cones)
+            const spikeGeometry = new THREE.ConeGeometry(0.05, 0.3, 16);
+            const spikeMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x5D4037,
+                roughness: 0.5
+            });
+            
+            // Add spikes to the back
+            for (let i = 0; i < 20; i++) {
+                const angle = (i / 20) * Math.PI * 2;
+                const radius = 0.45;
+                
+                const spike = new THREE.Mesh(spikeGeometry, spikeMaterial);
+                spike.position.set(
+                    Math.cos(angle) * radius,
+                    Math.sin(angle) * radius * 0.5,
+                    -0.4
+                );
+                
+                // Rotate spikes to point outward
+                spike.rotation.x = Math.PI / 2;
+                spike.rotation.z = angle;
+                
+                body.add(spike);
+            }
+            
+            hedgehog = new THREE.Group();
+            hedgehog.add(body);
+            hedgehog.position.set(0, 0.5, -8);
+            scene.add(hedgehog);
+            
+            // Physics body for hedgehog
+            hedgehogBody = new CANNON.Body({
+                mass: 2,
+                shape: new CANNON.Sphere(0.5),
+                position: new CANNON.Vec3(0, 0.5, -8),
+                linearDamping: 0.4,
+                angularDamping: 0.4
+            });
+            world.addBody(hedgehogBody);
+        }
+        
+        // Create bowling pins
+        function createPins() {
+            const pinGroup = new THREE.Group();
+            
+            // Pin shape
+            const pinGeometry = new THREE.CylinderGeometry(0.1, 0.2, 0.8, 32);
+            const pinMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xFFFFFF,
+                roughness: 0.2,
+                metalness: 0.3
+            });
+            
+            // Pin positions in a triangle formation
+            const pinPositions = [];
+            const rows = 4;
+            const spacing = 0.5;
+            let pinCount = 0;
+            
+            for (let row = 0; row < rows; row++) {
+                const pinsInRow = row + 1;
+                const offset = (pinsInRow - 1) * spacing / 2;
+                
+                for (let i = 0; i < pinsInRow; i++) {
+                    const x = i * spacing - offset;
+                    const z = row * spacing + 7;
+                    pinPositions.push({x, z});
+                    pinCount++;
+                    
+                    if (pinCount >= 10) break;
+                }
+                if (pinCount >= 10) break;
+            }
+            
+            // Create pins
+            pinPositions.forEach(pos => {
+                const pinMesh = new THREE.Mesh(pinGeometry, pinMaterial);
+                pinMesh.position.set(pos.x, 0.4, pos.z);
+                pinMesh.castShadow = true;
+                pinGroup.add(pinMesh);
+                
+                // Physics body for pin
+                const pinBody = new CANNON.Body({
+                    mass: 1,
+                    shape: new CANNON.Cylinder(0.1, 0.2, 0.8, 16),
+                    position: new CANNON.Vec3(pos.x, 0.4, pos.z)
+                });
+                
+                // Rotate cylinder to stand upright (CANNON cylinders are Y-up by default)
+                pinBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+                
+                world.addBody(pinBody);
+                pins.push({ mesh: pinMesh, body: pinBody });
+            });
+            
+            scene.add(pinGroup);
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Start button
+            document.getElementById('start-btn').addEventListener('click', startGame);
+            
+            // Roll button
+            document.getElementById('roll-btn').addEventListener('click', rollHedgehog);
+            
+            // Position slider
+            const positionSlider = document.getElementById('position-slider');
+            positionSlider.addEventListener('input', () => {
+                const value = positionSlider.value;
+                document.getElementById('position-display').textContent = `${value}°`;
+                document.getElementById('position-value').textContent = `${value}°`;
+                
+                // Update hedgehog rotation for aiming
+                if (hedgehog && isHedgehogCurled) {
+                    hedgehog.rotation.y = value * (Math.PI / 180);
+                }
+            });
+            
+            // Speed slider
+            const speedSlider = document.getElementById('speed-slider');
+            speedSlider.addEventListener('input', () => {
+                const value = speedSlider.value;
+                document.getElementById('speed-display').textContent = `${value}%`;
+                document.getElementById('speed-value').textContent = `${value}%`;
+            });
+            
+            // Click on hedgehog
+            renderer.domElement.addEventListener('click', (event) => {
+                if (!gameStarted) return;
+                
+                // Check if we're in the reset phase
+                if (!isHedgehogCurled) {
+                    // Raycaster to detect if we clicked on the hedgehog
+                    const raycaster = new THREE.Raycaster();
+                    const mouse = new THREE.Vector2();
+                    
+                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+                    
+                    raycaster.setFromCamera(mouse, camera);
+                    
+                    const intersects = raycaster.intersectObject(hedgehog, true);
+                    
+                    if (intersects.length > 0) {
+                        curlHedgehog();
+                    }
+                }
+            });
+        }
+        
+        // Start the game
+        function startGame() {
+            gameStarted = true;
+            document.getElementById('instructions').classList.add('hidden');
+            curlHedgehog();
+        }
+        
+        // Curl the hedgehog into a ball
+        function curlHedgehog() {
+            isHedgehogCurled = true;
+            
+            // Reset hedgehog position
+            hedgehog.position.set(0, 0.5, -8);
+            hedgehog.rotation.y = 0;
+            hedgehogBody.position.set(0, 0.5, -8);
+            hedgehogBody.velocity.set(0, 0, 0);
+            hedgehogBody.angularVelocity.set(0, 0, 0);
+            hedgehogBody.quaternion.set(0, 0, 0, 1);
+            
+            // Reset sliders
+            document.getElementById('position-slider').value = 0;
+            document.getElementById('position-display').textContent = '0°';
+            document.getElementById('position-value').textContent = '0°';
+            
+            document.getElementById('speed-slider').value = 50;
+            document.getElementById('speed-display').textContent = '50%';
+            document.getElementById('speed-value').textContent = '50%';
+            
+            // Enable roll button
+            document.getElementById('roll-btn').disabled = false;
+            
+            // Show message
+            showMessage("Hedgehog curled and ready!", 2000);
+        }
+        
+        // Roll the hedgehog
+        function rollHedgehog() {
+            if (!isHedgehogCurled) return;
+            
+            isHedgehogCurled = false;
+            document.getElementById('roll-btn').disabled = true;
+            
+            // Get values from sliders
+            const position = parseFloat(document.getElementById('position-slider').value);
+            const speed = parseFloat(document.getElementById('speed-slider').value) / 100;
+            
+            // Convert position to radians
+            const angle = position * (Math.PI / 180);
+            
+            // Calculate force vector
+            const forceX = Math.sin(angle) * 15 * speed;
+            const forceZ = Math.cos(angle) * 30 * speed;
+            
+            // Apply impulse to hedgehog
+            hedgehogBody.applyImpulse(
+                new CANNON.Vec3(forceX, 0, forceZ),
+                hedgehogBody.position
+            );
+            
+            // Start checking for pin collisions
+            setTimeout(checkPins, 2000);
+        }
+        
+        // Check pin status
+        function checkPins() {
+            let pinsDown = 0;
+            
+            pins.forEach(pin => {
+                // If pin has fallen over (height is less than threshold)
+                if (pin.body.position.y < 0.2) {
+                    pinsDown++;
+                }
+            });
+            
+            // Update score
+            score += pinsDown * 10;
+            pinsStanding = 10 - pinsDown;
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('pins-left').textContent = pinsStanding;
+            
+            if (pinsDown > 0) {
+                showMessage(`Knocked down ${pinsDown} pins!`, 2000);
+            } else {
+                showMessage("No pins knocked down!", 2000);
+            }
+            
+            // Reset pins if all are down
+            if (pinsStanding === 0) {
+                setTimeout(resetPins, 3000);
+            }
+        }
+        
+        // Reset pins to standing position
+        function resetPins() {
+            pins.forEach(pin => {
+                pin.body.position.set(
+                    pin.body.initialPosition.x,
+                    pin.body.initialPosition.y,
+                    pin.body.initialPosition.z
+                );
+                pin.body.velocity.set(0, 0, 0);
+                pin.body.angularVelocity.set(0, 0, 0);
+                pin.body.quaternion.set(0, 0, 0, 1);
+            });
+            
+            pinsStanding = 10;
+            document.getElementById('pins-left').textContent = pinsStanding;
+            
+            showMessage("Pins reset! Tap hedgehog to play again", 3000);
+        }
+        
+        // Show message
+        function showMessage(text, duration) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.style.display = 'block';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, duration);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update physics world
+            world.step(1/60);
+            
+            // Update hedgehog position/rotation
+            if (hedgehog) {
+                hedgehog.position.copy(hedgehogBody.position);
+                hedgehog.quaternion.copy(hedgehogBody.quaternion);
+            }
+            
+            // Update pin positions/rotations
+            pins.forEach(pin => {
+                pin.mesh.position.copy(pin.body.position);
+                pin.mesh.quaternion.copy(pin.body.quaternion);
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Initialize the game when page loads
+        window.addEventListener('load', init);
+    </script>
 </body>
 </html>
