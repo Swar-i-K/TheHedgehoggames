@@ -1,110 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="hdghg.png" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hedge Roll - 3D Bowling</title>
-  <link rel="icon" href="favicon.ico" />
+  <title>Bowling Game - Advanced</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      font-family: sans-serif;
+      background: #222;
     }
-    #powerBar {
+    canvas {
+      display: block;
+    }
+    #scoreDisplay {
       position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 300px;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-family: sans-serif;
+      font-size: 20px;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.min.js"></script>
 </head>
 <body>
-  <input type="range" id="powerBar" min="1" max="20" value="10" />
+  <canvas id="game"></canvas>
+  <div id="scoreDisplay">Score: 0</div>
   <script>
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color('#88ccff');
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 5, 10);
+    const scoreDisplay = document.getElementById("scoreDisplay");
+    let score = 0;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    const lane = {
+      x: canvas.width / 2 - 75,
+      y: 0,
+      width: 150,
+      height: canvas.height,
+    };
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-    scene.add(light);
+    const ball = {
+      x: canvas.width / 2,
+      y: canvas.height - 100,
+      radius: 20,
+      vx: 0,
+      vy: 0,
+      speed: 20,
+      rolling: false,
+    };
 
-    const ground = new THREE.Mesh(
-      new THREE.BoxGeometry(10, 0.2, 30),
-      new THREE.MeshStandardMaterial({ color: '#885522' })
-    );
-    ground.position.y = -0.1;
-    scene.add(ground);
-
-    let hedgehog;
-    const loader = new THREE.GLTFLoader();
-
-    loader.load('assets/models/hedgehog.glb', function (gltf) {
-      hedgehog = gltf.scene;
-      hedgehog.scale.set(0.5, 0.5, 0.5);
-      hedgehog.position.set(0, 0.5, 10);
-      hedgehog.userData.velocity = new THREE.Vector3(0, 0, 0);
-      scene.add(hedgehog);
-    }, undefined, function (error) {
-      console.error('An error happened while loading the hedgehog model:', error);
-    });
+    let aimAngle = 0;
 
     const pins = [];
-    for (let i = -1; i <= 1; i++) {
-      const pin = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.2, 0.2, 1),
-        new THREE.MeshStandardMaterial({ color: 'white' })
-      );
-      pin.position.set(i * 1.5, 0.5, -10);
-      scene.add(pin);
-      pins.push(pin);
-    }
+    const pinRadius = 10;
+    const rows = 4;
 
-    let rolling = false;
-    const powerInput = document.getElementById('powerBar');
-
-    window.addEventListener('click', () => {
-      if (hedgehog && !rolling) {
-        rolling = true;
-        const power = parseFloat(powerInput.value);
-        hedgehog.userData.velocity.set(0, 0, -power * 0.1);
-      }
-    });
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      if (hedgehog && rolling) {
-        hedgehog.position.add(hedgehog.userData.velocity);
-        hedgehog.rotation.y += 0.1;
-
-        if (hedgehog.position.z < -15) {
-          rolling = false;
-          hedgehog.position.set(0, 0.5, 10);
-          hedgehog.userData.velocity.set(0, 0, 0);
+    function createPins() {
+      const startY = 100;
+      const spacing = 30;
+      pins.length = 0;
+      for (let row = 0; row < rows; row++) {
+        for (let i = 0; i <= row; i++) {
+          const x = lane.x + lane.width / 2 + (i - row / 2) * spacing;
+          const y = startY + row * spacing;
+          pins.push({ x, y, knocked: false, vx: 0, vy: 0 });
         }
       }
-
-      renderer.render(scene, camera);
     }
 
-    animate();
+    function drawLane() {
+      ctx.fillStyle = "#555";
+      ctx.fillRect(lane.x, lane.y, lane.width, lane.height);
+    }
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = "orange";
+      ctx.fill();
+    }
+
+    function drawPins() {
+      pins.forEach((pin) => {
+        if (!pin.knocked) {
+          ctx.beginPath();
+          ctx.arc(pin.x, pin.y, pinRadius, 0, Math.PI * 2);
+          ctx.fillStyle = "white";
+          ctx.fill();
+        }
+      });
+    }
+
+    function drawAimLine() {
+      if (!ball.rolling) {
+        ctx.strokeStyle = "yellow";
+        ctx.beginPath();
+        ctx.moveTo(ball.x, ball.y);
+        ctx.lineTo(
+          ball.x + Math.sin(aimAngle) * 100,
+          ball.y - Math.cos(aimAngle) * 100
+        );
+        ctx.stroke();
+      }
+    }
+
+    function updateBall() {
+      if (ball.rolling) {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        // Friction
+        ball.vx *= 0.99;
+        ball.vy *= 0.99;
+
+        pins.forEach((pin) => {
+          if (!pin.knocked) {
+            const dx = ball.x - pin.x;
+            const dy = ball.y - pin.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < ball.radius + pinRadius) {
+              pin.knocked = true;
+              score += 10;
+              pin.vx = ball.vx * 0.5;
+              pin.vy = ball.vy * 0.5;
+              ball.vx *= 0.8;
+              ball.vy *= 0.8;
+            }
+          }
+        });
+
+        if (ball.y < 0 || Math.abs(ball.vx) + Math.abs(ball.vy) < 0.2) {
+          ball.rolling = false;
+          setTimeout(resetRound, 1500);
+        }
+      }
+    }
+
+    function updatePins() {
+      pins.forEach((pin) => {
+        if (pin.knocked) {
+          pin.x += pin.vx;
+          pin.y += pin.vy;
+          pin.vx *= 0.95;
+          pin.vy *= 0.95;
+        }
+      });
+    }
+
+    function resetRound() {
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height - 100;
+      ball.vx = 0;
+      ball.vy = 0;
+      aimAngle = 0;
+      createPins();
+      updateScore();
+    }
+
+    function updateScore() {
+      scoreDisplay.textContent = `Score: ${score}`;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawLane();
+      drawBall();
+      drawPins();
+      drawAimLine();
+    }
+
+    function loop() {
+      draw();
+      updateBall();
+      updatePins();
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!ball.rolling) {
+        const dx = e.clientX - ball.x;
+        const dy = ball.y - e.clientY;
+        aimAngle = Math.atan2(dx, dy);
+      }
     });
+
+    canvas.addEventListener("click", () => {
+      if (!ball.rolling) {
+        ball.vx = Math.sin(aimAngle) * ball.speed;
+        ball.vy = -Math.cos(aimAngle) * ball.speed;
+        ball.rolling = true;
+      }
+    });
+
+    createPins();
+    loop();
   </script>
 </body>
 </html>
