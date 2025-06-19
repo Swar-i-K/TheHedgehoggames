@@ -1,5 +1,5 @@
 body {
-  background-color: #fdf6e3;
+  background: url('bowling-alley-bg.jpg') no-repeat center center fixed;
   text-align: center;
   font-family: sans-serif;
 }
