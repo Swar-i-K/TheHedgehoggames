@@ -8,7 +8,8 @@
     body {
       margin: 0;
       overflow: hidden;
-      background: #222;
+      background: url('https://i.ibb.co/jZmB8RZ/bowling-alley-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
     }
     canvas {
       display: block;
@@ -20,6 +21,7 @@
       color: white;
       font-family: sans-serif;
       font-size: 20px;
+      text-shadow: 1px 1px 3px black;
     }
   </style>
 </head>
@@ -72,7 +74,7 @@
     }
 
     function drawLane() {
-      ctx.fillStyle = "#555";
+      ctx.fillStyle = "rgba(85, 85, 85, 0.6)";
       ctx.fillRect(lane.x, lane.y, lane.width, lane.height);
     }
 
