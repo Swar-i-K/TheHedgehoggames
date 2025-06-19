@@ -1,9 +1,60 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-canvas.width = 400;
-canvas.height = 300;
-ctx.fillStyle = 'green';
-ctx.fillRect(50, 50, 100, 100);
-Spike Mine.glb
-Bowling.jpg
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+let scene, camera, renderer, mixer, clock;
+let spikeBall;
+
+function init() {
+  scene = new THREE.Scene();
+
+  camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(0, 2, 10);
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+  scene.add(ambientLight);
+
+  // Load GLB Model
+  const loader = new THREE.GLTFLoader();
+  loader.load("Spike Mine.glb", (gltf) => {
+    spikeBall = gltf.scene;
+    spikeBall.scale.set(1, 1, 1);
+    scene.add(spikeBall);
+
+    // Optional: Animation support
+    mixer = new THREE.AnimationMixer(spikeBall);
+    if (gltf.animations.length > 0) {
+      gltf.animations.forEach((clip) => {
+        mixer.clipAction(clip).play();
+      });
+    }
+  });
+
+  clock = new THREE.Clock();
+
+  animate();
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (spikeBall) {
+    // Roll forward like a ball
+    spikeBall.position.z -= 0.1;
+    spikeBall.rotation.x += 0.05;
+  }
+
+  if (mixer) {
+    mixer.update(clock.getDelta());
+  }
+
+  renderer.render(scene, camera);
+}
+
+init();
