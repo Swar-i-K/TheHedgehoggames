@@ -1,10 +1,27 @@
 let hedgehogs = [];
 let hedgehogImg, ballImg;
+let imagesLoaded = { hedgehog: false, ball: false };
 
 function preload() {
-  // Load images from the same directory (relative paths for GitHub Pages)
-  hedgehogImg = loadImage('hdghg.jpg');
-  ballImg = loadImage('hdghg ball.png');
+  try {
+    // Load images from the same directory (relative paths for GitHub Pages)
+    hedgehogImg = loadImage('hdghg.jpg', 
+      () => {
+        console.log('Hedgehog image loaded successfully');
+        imagesLoaded.hedgehog = true;
+      },
+      (err) => console.error('Failed to load hdghg.jpg:', err)
+    );
+    ballImg = loadImage('hdghg ball.png', 
+      () => {
+        console.log('Ball image loaded successfully');
+        imagesLoaded.ball = true;
+      },
+      (err) => console.error('Failed to load hdghg ball.png:', err)
+    );
+  } catch (err) {
+    console.error('Error in preload:', err);
+  }
 }
 
 function setup() {
@@ -12,6 +29,8 @@ function setup() {
   for (let i = 0; i < 5; i++) {
     hedgehogs.push(new Hedgehog());
   }
+  // Log initial image status
+  console.log('Image load status:', imagesLoaded);
 }
 
 function draw() {
@@ -69,12 +88,30 @@ class Hedgehog {
   }
 
   display() {
-    imageMode(CENTER);
+    push();
+    translate(this.x, this.y);
     if (this.isBall) {
-      image(ballImg, this.x, this.y, 50, 50);
+      if (imagesLoaded.ball) {
+        imageMode(CENTER);
+        image(ballImg, 0, 0, 50, 50);
+      } else {
+        // Fallback if ball image fails to load
+        fill(255, 0, 0); // Red rectangle
+        rectMode(CENTER);
+        rect(0, 0, 50, 50);
+      }
     } else {
-      image(hedgehogImg, this.x, this.y, 50, 50);
+      if (imagesLoaded.hedgehog) {
+        imageMode(CENTER);
+        image(hedgehogImg, 0, 0, 50, 50);
+      } else {
+        // Fallback if hedgehog image fails to load
+        fill(0, 255, 0); // Green rectangle
+        rectMode(CENTER);
+        rect(0, 0, 50, 50);
+      }
     }
+    pop();
   }
 
   toggleImage() {
