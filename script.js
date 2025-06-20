@@ -4,21 +4,30 @@ let imagesLoaded = { hedgehog: false, ball: false };
 
 function preload() {
   try {
-    // Load images from the same directory (relative paths for GitHub Pages)
-    hedgehogImg = loadImage('hdghg.jpg', 
+    // Load images from the repository root
+    hedgehogImg = loadImage('hdghg fc.png', 
       () => {
-        console.log('Hedgehog image loaded successfully');
+        console.log('Hedgehog image loaded successfully: hdghg fc.png');
         imagesLoaded.hedgehog = true;
       },
-      (err) => console.error('Failed to load hdghg.jpg:', err)
+      (err) => console.error('Failed to load hdghg fc.png:', err)
     );
     ballImg = loadImage('hdghg ball.png', 
       () => {
-        console.log('Ball image loaded successfully');
+        console.log('Ball image loaded successfully: hdghg ball.png');
         imagesLoaded.ball = true;
       },
       (err) => console.error('Failed to load hdghg ball.png:', err)
     );
+    // For testing, uncomment placeholders if images fail
+    // hedgehogImg = loadImage('https://placekitten.com/50/50', 
+    //   () => { console.log('Hedgehog placeholder loaded'); imagesLoaded.hedgehog = true; },
+    //   (err) => console.error('Failed to load hedgehog placeholder:', err)
+    // );
+    // ballImg = loadImage('https://placekitten.com/50/50?image=2', 
+    //   () => { console.log('Ball placeholder loaded'); imagesLoaded.ball = true; },
+    //   (err) => console.error('Failed to load ball placeholder:', err)
+    // );
   } catch (err) {
     console.error('Error in preload:', err);
   }
@@ -29,8 +38,9 @@ function setup() {
   for (let i = 0; i < 5; i++) {
     hedgehogs.push(new Hedgehog());
   }
-  // Log initial image status
   console.log('Image load status:', imagesLoaded);
+  console.log('Repository URL: https://swarnaikhan.github.io/TheHedgehoggames/');
+  console.log('Check files at: https://github.com/swarnaikhan/TheHedgehoggames');
 }
 
 function draw() {
@@ -95,8 +105,7 @@ class Hedgehog {
         imageMode(CENTER);
         image(ballImg, 0, 0, 50, 50);
       } else {
-        // Fallback if ball image fails to load
-        fill(255, 0, 0); // Red rectangle
+        fill(255, 0, 0); // Red rectangle fallback
         rectMode(CENTER);
         rect(0, 0, 50, 50);
       }
@@ -105,8 +114,7 @@ class Hedgehog {
         imageMode(CENTER);
         image(hedgehogImg, 0, 0, 50, 50);
       } else {
-        // Fallback if hedgehog image fails to load
-        fill(0, 255, 0); // Green rectangle
+        fill(0, 255, 0); // Green rectangle fallback
         rectMode(CENTER);
         rect(0, 0, 50, 50);
       }
@@ -116,9 +124,9 @@ class Hedgehog {
 
   toggleImage() {
     this.isBall = !this.isBall;
-    this.toggleTime = millis(); // Record time of toggle
+    this.toggleTime = millis();
     if (this.isBall) {
-      this.vy = -5; // Small upward boost when curling
+      this.vy = -5; // Small upward boost
     }
   }
 }
