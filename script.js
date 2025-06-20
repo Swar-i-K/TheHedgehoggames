@@ -2,12 +2,9 @@ let hedgehogs = [];
 let hedgehogImg, ballImg;
 
 function preload() {
-  // Using reliable online placeholder images to avoid fetch errors
-  hedgehogImg = loadImage('https://picsum.photos/50/50?random=1');
-  ballImg = loadImage('https://picsum.photos/50/50?random=2');
-  // To use local images, uncomment the lines below and ensure files are in the same directory
-  // hedgehogImg = loadImage('hdghg.jpg');
-  // ballImg = loadImage('hdghg ball.png');
+  // Load images from the same directory (relative paths for GitHub Pages)
+  hedgehogImg = loadImage('hdghg.jpg');
+  ballImg = loadImage('hdghg ball.png');
 }
 
 function setup() {
@@ -29,7 +26,7 @@ function mousePressed() {
   for (let hedgehog of hedgehogs) {
     let d = dist(mouseX, mouseY, hedgehog.x, hedgehog.y);
     if (d < 25) {
-      hedgehog.toggleState();
+      hedgehog.toggleImage();
     }
   }
 }
@@ -45,6 +42,7 @@ class Hedgehog {
     this.vx = random(-3, 3);
     this.vy = random(-3, 3);
     this.isBall = false;
+    this.toggleTime = 0;
   }
 
   update() {
@@ -63,6 +61,11 @@ class Hedgehog {
     if (!this.isBall) {
       this.vy += 0.1;
     }
+
+    // Revert image after 50ms
+    if (this.isBall && millis() - this.toggleTime > 50) {
+      this.isBall = false;
+    }
   }
 
   display() {
@@ -74,8 +77,9 @@ class Hedgehog {
     }
   }
 
-  toggleState() {
+  toggleImage() {
     this.isBall = !this.isBall;
+    this.toggleTime = millis(); // Record time of toggle
     if (this.isBall) {
       this.vy = -5; // Small upward boost when curling
     }
