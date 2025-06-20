@@ -1,206 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bowling Game</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hedgehog Bounce</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: url('assets/model/Bowling.jpg') no-repeat center center fixed;
-      background-size: cover;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
     }
     canvas {
       display: block;
     }
-    #scoreDisplay {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      font-family: sans-serif;
-      font-size: 20px;
-      text-shadow: 1px 1px 3px black;
-    }
   </style>
 </head>
 <body>
-  <canvas id="game"></canvas>
-  <div id="scoreDisplay">Score: 0</div>
   <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let hedgehogs = [];
+    let hedgehogImg, ballImg;
 
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    let score = 0;
+    function preload() {
+      // Using reliable placeholder images from picsum.photos
+      hedgehogImg = loadImage('https://picsum.photos/50/50?random=1');
+      ballImg = loadImage('https://picsum.photos/50/50?random=2');
+    }
 
-    const lane = {
-      x: canvas.width / 2 - 75,
-      y: 0,
-      width: 150,
-      height: canvas.height,
-    };
-
-    const ball = {
-      x: canvas.width / 2,
-      y: canvas.height - 100,
-      radius: 20,
-      vx: 0,
-      vy: 0,
-      speed: 20,
-      rolling: false,
-    };
-
-    let aimAngle = 0;
-
-    const pins = [];
-    const pinRadius = 10;
-    const rows = 4;
-
-    function createPins() {
-      const startY = 100;
-      const spacing = 30;
-      pins.length = 0;
-      for (let row = 0; row < rows; row++) {
-        for (let i = 0; i <= row; i++) {
-          const x = lane.x + lane.width / 2 + (i - row / 2) * spacing;
-          const y = startY + row * spacing;
-          pins.push({ x, y, knocked: false, vx: 0, vy: 0 });
-        }
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      for (let i = 0; i < 5; i++) {
+        hedgehogs.push(new Hedgehog());
       }
-    }
-
-    function drawLane() {
-      ctx.fillStyle = "rgba(85, 85, 85, 0.6)";
-      ctx.fillRect(lane.x, lane.y, lane.width, lane.height);
-    }
-
-    function drawBall() {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fillStyle = "orange";
-      ctx.fill();
-    }
-
-    function drawPins() {
-      pins.forEach((pin) => {
-        if (!pin.knocked) {
-          ctx.beginPath();
-          ctx.arc(pin.x, pin.y, pinRadius, 0, Math.PI * 2);
-          ctx.fillStyle = "white";
-          ctx.fill();
-        }
-      });
-    }
-
-    function drawAimLine() {
-      if (!ball.rolling) {
-        ctx.strokeStyle = "yellow";
-        ctx.beginPath();
-        ctx.moveTo(ball.x, ball.y);
-        ctx.lineTo(
-          ball.x + Math.sin(aimAngle) * 100,
-          ball.y - Math.cos(aimAngle) * 100
-        );
-        ctx.stroke();
-      }
-    }
-
-    function updateBall() {
-      if (ball.rolling) {
-        ball.x += ball.vx;
-        ball.y += ball.vy;
-
-        // Friction
-        ball.vx *= 0.99;
-        ball.vy *= 0.99;
-
-        pins.forEach((pin) => {
-          if (!pin.knocked) {
-            const dx = ball.x - pin.x;
-            const dy = ball.y - pin.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < ball.radius + pinRadius) {
-              pin.knocked = true;
-              score += 10;
-              pin.vx = ball.vx * 0.5;
-              pin.vy = ball.vy * 0.5;
-              ball.vx *= 0.8;
-              ball.vy *= 0.8;
-            }
-          }
-        });
-
-        if (ball.y < 0 || Math.abs(ball.vx) + Math.abs(ball.vy) < 0.2) {
-          ball.rolling = false;
-          setTimeout(resetRound, 1500);
-        }
-      }
-    }
-
-    function updatePins() {
-      pins.forEach((pin) => {
-        if (pin.knocked) {
-          pin.x += pin.vx;
-          pin.y += pin.vy;
-          pin.vx *= 0.95;
-          pin.vy *= 0.95;
-        }
-      });
-    }
-
-    function resetRound() {
-      ball.x = canvas.width / 2;
-      ball.y = canvas.height - 100;
-      ball.vx = 0;
-      ball.vy = 0;
-      aimAngle = 0;
-      createPins();
-      updateScore();
-    }
-
-    function updateScore() {
-      scoreDisplay.textContent = `Score: ${score}`;
     }
 
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawLane();
-      drawBall();
-      drawPins();
-      drawAimLine();
+      background(240);
+      for (let hedgehog of hedgehogs) {
+        hedgehog.update();
+        hedgehog.display();
+      }
     }
 
-    function loop() {
-      draw();
-      updateBall();
-      updatePins();
-      requestAnimationFrame(loop);
+    function mousePressed() {
+      for (let hedgehog of hedgehogs) {
+        let d = dist(mouseX, mouseY, hedgehog.x, hedgehog.y);
+        if (d < 25) {
+          hedgehog.toggleState();
+        }
+      }
     }
 
-    canvas.addEventListener("mousemove", (e) => {
-      if (!ball.rolling) {
-        const dx = e.clientX - ball.x;
-        const dy = ball.y - e.clientY;
-        aimAngle = Math.atan2(dx, dy);
-      }
-    });
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
 
-    canvas.addEventListener("click", () => {
-      if (!ball.rolling) {
-        ball.vx = Math.sin(aimAngle) * ball.speed;
-        ball.vy = -Math.cos(aimAngle) * ball.speed;
-        ball.rolling = true;
+    class Hedgehog {
+      constructor() {
+        this.x = random(width);
+        this.y = random(height);
+        this.vx = random(-3, 3);
+        this.vy = random(-3, 3);
+        this.isBall = false;
       }
-    });
 
-    createPins();
-    loop();
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Bounce off walls
+        if (this.x < 25 || this.x > width - 25) {
+          this.vx *= -1;
+        }
+        if (this.y < 25 || this.y > height - 25) {
+          this.vy *= -1;
+        }
+
+        // Apply gravity when not in ball state
+        if (!this.isBall) {
+          this.vy += 0.1;
+        }
+      }
+
+      display() {
+        imageMode(CENTER);
+        if (this.isBall) {
+          image(ballImg, this.x, this.y, 50, 50);
+        } else {
+          image(hedgehogImg, this.x, this.y, 50, 50);
+        }
+      }
+
+      toggleState() {
+        this.isBall = !this.isBall;
+        if (this.isBall) {
+          this.vy = -5; // Small upward boost when curling
+        }
+      }
+    }
   </script>
 </body>
 </html>
