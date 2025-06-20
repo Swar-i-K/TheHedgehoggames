@@ -1,60 +1,83 @@
-let scene, camera, renderer, mixer, clock;
-let spikeBall;
+let hedgehogs = [];
+let hedgehogImg, ballImg;
 
-function init() {
-  scene = new THREE.Scene();
+function preload() {
+  // Using reliable online placeholder images to avoid fetch errors
+  hedgehogImg = loadImage('https://picsum.photos/50/50?random=1');
+  ballImg = loadImage('https://picsum.photos/50/50?random=2');
+  // To use local images, uncomment the lines below and ensure files are in the same directory
+  // hedgehogImg = loadImage('hdghg.jpg');
+  // ballImg = loadImage('hdghg ball.png');
+}
 
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 2, 10);
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  for (let i = 0; i < 5; i++) {
+    hedgehogs.push(new Hedgehog());
+  }
+}
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+function draw() {
+  background(240);
+  for (let hedgehog of hedgehogs) {
+    hedgehog.update();
+    hedgehog.display();
+  }
+}
 
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-  scene.add(ambientLight);
-
-  // Load GLB Model
-  const loader = new THREE.GLTFLoader();
-  loader.load("Spike Mine.glb", (gltf) => {
-    spikeBall = gltf.scene;
-    spikeBall.scale.set(1, 1, 1);
-    scene.add(spikeBall);
-
-    // Optional: Animation support
-    mixer = new THREE.AnimationMixer(spikeBall);
-    if (gltf.animations.length > 0) {
-      gltf.animations.forEach((clip) => {
-        mixer.clipAction(clip).play();
-      });
+function mousePressed() {
+  for (let hedgehog of hedgehogs) {
+    let d = dist(mouseX, mouseY, hedgehog.x, hedgehog.y);
+    if (d < 25) {
+      hedgehog.toggleState();
     }
-  });
-
-  clock = new THREE.Clock();
-
-  animate();
+  }
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-
-  if (spikeBall) {
-    // Roll forward like a ball
-    spikeBall.position.z -= 0.1;
-    spikeBall.rotation.x += 0.05;
-  }
-
-  if (mixer) {
-    mixer.update(clock.getDelta());
-  }
-
-  renderer.render(scene, camera);
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 
-init();
+class Hedgehog {
+  constructor() {
+    this.x = random(width);
+    this.y = random(height);
+    this.vx = random(-3, 3);
+    this.vy = random(-3, 3);
+    this.isBall = false;
+  }
+
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // Bounce off walls
+    if (this.x < 25 || this.x > width - 25) {
+      this.vx *= -1;
+    }
+    if (this.y < 25 || this.y > height - 25) {
+      this.vy *= -1;
+    }
+
+    // Apply gravity when not in ball state
+    if (!this.isBall) {
+      this.vy += 0.1;
+    }
+  }
+
+  display() {
+    imageMode(CENTER);
+    if (this.isBall) {
+      image(ballImg, this.x, this.y, 50, 50);
+    } else {
+      image(hedgehogImg, this.x, this.y, 50, 50);
+    }
+  }
+
+  toggleState() {
+    this.isBall = !this.isBall;
+    if (this.isBall) {
+      this.vy = -5; // Small upward boost when curling
+    }
+  }
+}
