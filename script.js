@@ -24,7 +24,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight, P2D); // Use P2D renderer for transparency
   for (let i = 0; i < 5; i++) {
     hedgehogs.push(new Hedgehog());
   }
@@ -33,7 +33,7 @@ function setup() {
 }
 
 function draw() {
-  background(240);
+  // Remove background(240) to keep canvas transparent
   for (let hedgehog of hedgehogs) {
     hedgehog.update();
     hedgehog.display();
