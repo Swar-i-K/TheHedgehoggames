@@ -92,7 +92,7 @@ class Hedgehog {
     }
 
     // Revert image after 500ms
-    if (this.isBall && millis() - this.toggleTime > 500) {
+    if (this.isBall && millis() - this.toggleTime > 1000) {
       this.isBall = false;
     }
   }
