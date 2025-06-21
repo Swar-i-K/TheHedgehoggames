@@ -4,7 +4,6 @@ let imagesLoaded = { hedgehog: false, ball: false };
 
 function preload() {
   try {
-    // Load images from the repository root
     hedgehogImg = loadImage('hdghg fc.png', 
       () => {
         console.log('Hedgehog image loaded successfully: hdghg fc.png');
@@ -19,15 +18,6 @@ function preload() {
       },
       (err) => console.error('Failed to load hdghg ball.png:', err)
     );
-    // For testing, uncomment placeholders if images fail
-    // hedgehogImg = loadImage('https://placekitten.com/50/50', 
-    //   () => { console.log('Hedgehog placeholder loaded'); imagesLoaded.hedgehog = true; },
-    //   (err) => console.error('Failed to load hedgehog placeholder:', err)
-    // );
-    // ballImg = loadImage('https://placekitten.com/50/50?image=2', 
-    //   () => { console.log('Ball placeholder loaded'); imagesLoaded.ball = true; },
-    //   (err) => console.error('Failed to load ball placeholder:', err)
-    // );
   } catch (err) {
     console.error('Error in preload:', err);
   }
@@ -40,7 +30,6 @@ function setup() {
   }
   console.log('Image load status:', imagesLoaded);
   console.log('Repository URL: https://swarnaikhan.github.io/TheHedgehoggames/');
-  console.log('Check files at: https://github.com/swarnaikhan/TheHedgehoggames');
 }
 
 function draw() {
@@ -91,7 +80,7 @@ class Hedgehog {
       this.vy += 0.1;
     }
 
-    // Revert image after 500ms
+    // Revert image after 1000ms (1 second)
     if (this.isBall && millis() - this.toggleTime > 1000) {
       this.isBall = false;
     }
