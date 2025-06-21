@@ -25,5 +25,6 @@ body.jungle-background::before {
 
 canvas {
   display: block;
-  z-index: 1; /* Ensure canvas is above background */
+  z-index: 1; /* Above background */
+  background: transparent; /* Ensure canvas is transparent */
 }
