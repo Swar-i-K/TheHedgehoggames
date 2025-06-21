@@ -12,7 +12,7 @@ body {
 
 body.jungle-background::before {
   content: '';
-  position: absolute;
+  position: fixed; /* Ensure background covers entire viewport */
   top: 0;
   left: 0;
   width: 100%;
@@ -26,5 +26,5 @@ body.jungle-background::before {
 canvas {
   display: block;
   z-index: 1; /* Above background */
-  background: transparent; /* Ensure canvas is transparent */
+  background: transparent !important; /* Force transparency */
 }
