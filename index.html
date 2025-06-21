@@ -9,5 +9,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <script>
+    // Jungle-themed soft colors
+    const jungleColors = [
+      'rgb(85, 107, 47)',  // Moss Green
+      'rgb(107, 142, 35)', // Olive
+      'rgb(79, 121, 66)',  // Fern Green
+      'rgb(152, 251, 152)', // Sage Green
+      'rgb(139, 69, 19)',  // Earthy Brown
+      'rgb(47, 79, 79)',   // Muted Teal
+      'rgb(34, 139, 34)',  // Forest Green
+      'rgb(144, 238, 144)' // Lichen Green
+    ];
+    // Select two random colors for gradient
+    const color1 = jungleColors[Math.floor(Math.random() * jungleColors.length)];
+    const color2 = jungleColors[Math.floor(Math.random() * jungleColors.length)];
+    // Apply gradient class and set CSS variable
+    document.body.classList.add('jungle-background');
+    document.body.style.setProperty('--color1', color1);
+    document.body.style.setProperty('--color2', color2);
+  </script>
 </body>
 </html>
