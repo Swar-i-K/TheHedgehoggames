@@ -4,19 +4,19 @@ let imagesLoaded = { hedgehog: false, ball: false };
 
 function preload() {
   try {
-    hedgehogImg = loadImage('hdghg fc.png', 
+    hedgehogImg = loadImage('./hdghg fc.png', 
       () => {
-        console.log('Hedgehog image loaded successfully: hdghg fc.png');
+        console.log('Hedgehog image loaded successfully: ./hdghg fc.png');
         imagesLoaded.hedgehog = true;
       },
-      (err) => console.error('Failed to load hdghg fc.png:', err)
+      (err) => console.error('Failed to load ./hdghg fc.png:', err)
     );
-    ballImg = loadImage('hdghg ball.png', 
+    ballImg = loadImage('./hdghg ball.png', 
       () => {
-        console.log('Ball image loaded successfully: hdghg ball.png');
+        console.log('Ball image loaded successfully: ./hdghg ball.png');
         imagesLoaded.ball = true;
       },
-      (err) => console.error('Failed to load hdghg ball.png:', err)
+      (err) => console.error('Failed to load ./hdghg ball.png:', err)
     );
   } catch (err) {
     console.error('Error in preload:', err);
@@ -24,7 +24,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight, P2D); // Use P2D renderer for transparency
+  createCanvas(windowWidth, windowHeight, P2D); // Use P2D for transparency
   for (let i = 0; i < 5; i++) {
     hedgehogs.push(new Hedgehog());
   }
@@ -33,7 +33,7 @@ function setup() {
 }
 
 function draw() {
-  // Remove background(240) to keep canvas transparent
+  clear(); // Clear canvas to transparent
   for (let hedgehog of hedgehogs) {
     hedgehog.update();
     hedgehog.display();
