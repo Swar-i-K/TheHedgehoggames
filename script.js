@@ -29,7 +29,7 @@ function setup() {
     hedgehogs.push(new Hedgehog());
   }
   console.log('Image load status:', imagesLoaded);
-  console.log('Repository URL: https://swarnaikhan.github.io/TheHedgehoggames/');
+  console.log('Repository URL: https://swar-i-k.github.io/TheHedgehoggames/');
 }
 
 function draw() {
