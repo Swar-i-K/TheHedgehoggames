@@ -4,12 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hedgehog Bounce</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+  <script src="script.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="canvas-container"></div>
-  <div id="score">Hedgehogs: 0</div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+  <script>
+    // Jungle-themed soft colors
+    const jungleColors = [
+      'rgb(85, 107, 47)',  // Moss Green
+      'rgb(107, 142, 35)', // Olive
+      'rgb(79, 121, 66)',  // Fern Green
+      'rgb(152, 251, 152)', // Sage Green
+      'rgb(139, 69, 19)',  // Earthy Brown
+      'rgb(47, 79, 79)',   // Muted Teal
+      'rgb(34, 139, 34)',  // Forest Green
+      'rgb(144, 238, 144)' // Lichen Green
+    ];
+    // Select two random colors for gradient
+    const color1 = jungleColors[Math
