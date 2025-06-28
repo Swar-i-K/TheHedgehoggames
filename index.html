@@ -24,7 +24,8 @@
               World = Matter.World,
               Bodies = Matter.Bodies,
               Mouse = Matter.Mouse,
-              MouseConstraint = Matter.MouseConstraint;
+              MouseConstraint = Matter.MouseConstraint,
+              Vector = Matter.Vector;
 
         // Create engine and renderer
         const engine = Engine.create();
@@ -89,6 +90,21 @@
             }
         });
         World.add(world, mouseConstraint);
+
+        // Apply random forces to keep hedgehogs moving
+        Matter.Events.on(engine, 'beforeUpdate', function() {
+            // Apply random force every 0.5 seconds (30 frames at 60 FPS)
+            if (engine.timing.timestamp % 500 < 16.67) { // Approx 0.5s interval
+                hedgehogs.forEach(hedgehog => {
+                    const forceMagnitude = 0.002; // Adjust for desired speed
+                    const force = Vector.create(
+                        (Math.random() - 0.5) * forceMagnitude, // Random x direction
+                        (Math.random() - 0.5) * forceMagnitude  // Random y direction
+                    );
+                    Matter.Body.applyForce(hedgehog, hedgehog.position, force);
+                });
+            }
+        });
 
         // Run the engine and renderer
         Engine.run(engine);
