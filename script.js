@@ -1,98 +1,110 @@
-// Matter.js module aliases
-const { Engine, Render, World, Bodies, Mouse, MouseConstraint, Composites } = Matter;
+let hedgehogs = [];
+let images = [];
 
-// Create engine and renderer
-const engine = Engine.create();
-const world = engine.world;
-
-const canvasContainer = document.getElementById('canvas-container');
-const render = Render.create({
-  element: canvasContainer,
-  engine: engine,
-  options: {
-    width: window.innerWidth,
-    height: window.innerHeight,
-    wireframes: false,
-    background: '#f0f0f0'
-  }
-});
-
-// Hedgehog images array
-const hedgehogImages = [
-  'images/hg.png',
-  'images/hg2.png',
-  'images/hg5.png',
-  'images/hg6.png',
-  'images/hg7 (1).png',
-  'images/hg7 (2).png'
-];
-
-// Track number of hedgehogs
-let hedgehogCount = 0;
-const scoreElement = document.getElementById('score');
-
-// Function to create a hedgehog
-function createHedgehog(x, y) {
-  const size = 50 + Math.random() * 50; // Random size between 50 and 100
-  const hedgehogImg = hedgehogImages[Math.floor(Math.random() * hedgehogImages.length)];
-  
-  const hedgehog = Bodies.circle(x, y, size / 2, {
-    restitution: 0.8, // Bounciness
-    friction: 0.1,
-    render: {
-      sprite: {
-        texture: hedgehogImg,
-        xScale: size / 100, // Adjust scale based on image size
-        yScale: size / 100
-      }
-    }
-  });
-  hedgehogCount++;
-  scoreElement.textContent = `Hedgehogs: ${hedgehogCount}`;
-  return hedgehog;
+function preload() {
+  // Load the six hedgehog images
+  images.push(loadImage('hg.png'));
+  images.push(loadImage('hg2.png'));
+  images.push(loadImage('hg5.png'));
+  images.push(loadImage('hg6.png'));
+  images.push(loadImage('hg7 (1).png'));
+  images.push(loadImage('hg7 (2).png'));
 }
 
-// Add initial hedgehogs
-const hedgehogs = Composites.stack(100, 0, 5, 2, 20, 20, (x, y) => createHedgehog(x, y));
-World.add(world, hedgehogs);
-
-// Add mouse control
-const mouse = Mouse.create(render.canvas);
-const mouseConstraint = MouseConstraint.create(engine, {
-  mouse: mouse,
-  constraint: {
-    stiffness: 0.2,
-    render: { visible: false }
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  // Start with 5 hedgehogs
+  for (let i = 0; i < 5; i++) {
+    hedgehogs.push(new Hedgehog(random(width), random(height)));
   }
-});
-World.add(world, mouseConstraint);
+}
 
-// Keep the mouse in sync with rendering
-render.mouse = mouse;
+function draw() {
+  background(240);
+  for (let hedgehog of hedgehogs) {
+    hedgehog.update();
+    hedgehog.display();
+  }
+}
 
-// Add ground and walls
-const ground = Bodies.rectangle(window.innerWidth / 2, window.innerHeight + 50, window.innerWidth, 100, { isStatic: true });
-const leftWall = Bodies.rectangle(-50, window.innerHeight / 2, 100, window.innerHeight, { isStatic: true });
-const rightWall = Bodies.rectangle(window.innerWidth + 50, window.innerHeight / 2, 100, window.innerHeight, { isStatic: true });
-World.add(world, [ground, leftWall, rightWall]);
+function mousePressed() {
+  for (let hedgehog of hedgehogs) {
+    if (hedgehog.isMouseOver()) {
+      hedgehog.isDragging = true;
+      hedgehog.offsetX = mouseX - hedgehog.x;
+      hedgehog.offsetY = mouseY - hedgehog.y;
+    }
+  }
+}
 
-// Add new hedgehogs periodically
-setInterval(() => {
-  const newHedgehog = createHedgehog(Math.random() * window.innerWidth, -50);
-  World.add(world, newHedgehog);
-}, 2000);
+function mouseReleased() {
+  for (let hedgehog of hedgehogs) {
+    hedgehog.isDragging = false;
+  }
+}
 
-// Run the engine and renderer
-Engine.run(engine);
-Render.run(render);
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
 
-// Resize canvas on window resize
-window.addEventListener('resize', () => {
-  render.canvas.width = window.innerWidth;
-  render.canvas.height = window.innerHeight;
-  render.options.width = window.innerWidth;
-  render.options.height = window.innerHeight;
-  Matter.Body.setPosition(ground, { x: window.innerWidth / 2, y: window.innerHeight + 50 });
-  Matter.Body.setPosition(leftWall, { x: -50, y: window.innerHeight / 2 });
-  Matter.Body.setPosition(rightWall, { x: window.innerWidth + 50, y: window.innerHeight / 2 });
-});
+function addHedgehogs() {
+  // Add 3 more hedgehogs at random positions
+  for (let i = 0; i < 3; i++) {
+    hedgehogs.push(new Hedgehog(random(width), random(height)));
+  }
+}
+
+class Hedgehog {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.vx = random(-2, 2);
+    this.vy = random(-2, 2);
+    this.size = 50;
+    this.isDragging = false;
+    this.offsetX = 0;
+    this.offsetY = 0;
+    // Randomly select one of the six images
+    this.img = images[floor(random(images.length))];
+  }
+
+  update() {
+    if (!this.isDragging) {
+      // Update position
+      this.x += this.vx;
+      this.y += this.vy;
+
+      // Bounce off walls
+      if (this.x < 0 || this.x > width - this.size) {
+        this.vx *= -1;
+      }
+      if (this.y < 0 || this.y > height - this.size) {
+        this.vy *= -1;
+      }
+
+      // Apply some gravity and friction
+      this.vy += 0.1;
+      this.vx *= 0.99;
+      this.vy *= 0.99;
+    } else {
+      // Drag the hedgehog
+      this.x = mouseX - this.offsetX;
+      this.y = mouseY - this.offsetY;
+      this.vx = 0;
+      this.vy = 0;
+    }
+
+    // Keep within canvas
+    this.x = constrain(this.x, 0, width - this.size);
+    this.y = constrain(this.y, 0, height - this.size);
+  }
+
+  display() {
+    image(this.img, this.x, this.y, this.size, this.size);
+  }
+
+  isMouseOver() {
+    return mouseX > this.x && mouseX < this.x + this.size &&
+           mouseY > this.y && mouseY < this.y + this.size;
+  }
+}
