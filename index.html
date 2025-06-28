@@ -91,6 +91,21 @@
         });
         World.add(world, mouseConstraint);
 
+        // Handle mouse clicks for jumping
+        Matter.Events.on(mouseConstraint, 'mousedown', function(event) {
+            const mousePosition = event.mouse.position;
+            hedgehogs.forEach(hedgehog => {
+                const distance = Math.sqrt(
+                    Math.pow(mousePosition.x - hedgehog.position.x, 2) +
+                    Math.pow(mousePosition.y - hedgehog.position.y, 2)
+                );
+                if (distance < 30) { // Clicked within hedgehog radius
+                    const jumpForce = Vector.create(0, -0.02); // Upward force
+                    Matter.Body.applyForce(hedgehog, hedgehog.position, jumpForce);
+                }
+            });
+        });
+
         // Apply random forces to keep hedgehogs moving
         Matter.Events.on(engine, 'beforeUpdate', function() {
             // Apply random force every 0.5 seconds (30 frames at 60 FPS)
