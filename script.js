@@ -58,8 +58,8 @@ class Hedgehog {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.vx = random(-3, 3); // Increased initial velocity for more dynamic floating
-    this.vy = random(-3, 3);
+    this.vx = random(-9, 9); // Increased initial velocity for more dynamic floating
+    this.vy = random(-9, 9);
     this.size = 150;
     this.isDragging = false;
     this.offsetX = 0;
