@@ -13,10 +13,10 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  // Start with 5 hedgehogs
-  for (let i = 0; i < 5; i++) {
-    hedgehogs.push(new Hedgehog(random(width), random(height)));
-  }
+  // Create one hedgehog for each image
+  images.forEach((img, i) => {
+    hedgehogs.push(new Hedgehog(random(width), random(height), i));
+  });
 }
 
 function draw() {
