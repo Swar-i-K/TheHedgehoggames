@@ -59,8 +59,8 @@
             const y = Math.random() * window.innerHeight / 2;
             const image = hedgehogImages[i % hedgehogImages.length]; // Assign each image
             const hedgehog = Bodies.circle(x, y, 30, {
-                restitution: 0.8,
-                friction: 0.1,
+                restitution: 0.9, // Increased for more bounce
+                friction: 0.05,   // Reduced for smoother motion
                 render: {
                     sprite: {
                         texture: image,
@@ -100,7 +100,10 @@
                     Math.pow(mousePosition.y - hedgehog.position.y, 2)
                 );
                 if (distance < 30) { // Clicked within hedgehog radius
-                    const jumpForce = Vector.create(0, -0.02); // Upward force
+                    const jumpForce = Vector.create(
+                        (Math.random() - 0.5) * 0.01, // Slight random x component
+                        -0.03 // Strong upward force
+                    );
                     Matter.Body.applyForce(hedgehog, hedgehog.position, jumpForce);
                 }
             });
@@ -108,10 +111,10 @@
 
         // Apply random forces to keep hedgehogs moving
         Matter.Events.on(engine, 'beforeUpdate', function() {
-            // Apply random force every 0.5 seconds (30 frames at 60 FPS)
-            if (engine.timing.timestamp % 500 < 16.67) { // Approx 0.5s interval
+            // Apply random force every 0.3 seconds (18 frames at 60 FPS)
+            if (engine.timing.timestamp % 300 < 16.67) { // Approx 0.3s interval
                 hedgehogs.forEach(hedgehog => {
-                    const forceMagnitude = 0.002; // Adjust for desired speed
+                    const forceMagnitude = 0.003; // Slightly stronger for livelier motion
                     const force = Vector.create(
                         (Math.random() - 0.5) * forceMagnitude, // Random x direction
                         (Math.random() - 0.5) * forceMagnitude  // Random y direction
