@@ -116,7 +116,7 @@
             // Apply random force every 0.2 seconds (12 frames at 60 FPS)
             if (engine.timing.timestamp % 200 < 16.67) { // Approx 0.2s interval
                 hedgehogs.forEach(hedgehog => {
-                    const forceMagnitude = 0.004; // Increased for livelier motion
+                    const forceMagnitude = 0.004; // Lively motion
                     const force = Vector.create(
                         (Math.random() - 0.5) * forceMagnitude, // Random x direction
                         (Math.random() - 0.5) * forceMagnitude  // Random y direction
