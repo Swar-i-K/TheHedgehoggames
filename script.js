@@ -1,16 +1,18 @@
 let hedgehogs = [];
 let images = [];
+let hgbImage;
 
 function preload() {
-  // Load the six hedgehog images
+  // Load the six hedgehog images and hgb.png
   images.push(loadImage('hg.png'));
   images.push(loadImage('hg2.png'));
   images.push(loadImage('hg5.png'));
   images.push(loadImage('hg6.png'));
   images.push(loadImage('hg7 (1).png'));
   images.push(loadImage('hg7 (2).png'));
+  hgbImage = loadImage('hgb.png');
   // Log to confirm images loaded
-  console.log(`Loaded ${images.length} images`);
+  console.log(`Loaded ${images.length} main images and hgb.png`);
 }
 
 function setup() {
@@ -32,6 +34,9 @@ function draw() {
 function mousePressed() {
   for (let hedgehog of hedgehogs) {
     if (hedgehog.isMouseOver()) {
+      // Toggle image on click
+      hedgehog.toggleImage();
+      // Enable dragging
       hedgehog.isDragging = true;
       hedgehog.offsetX = mouseX - hedgehog.x;
       hedgehog.offsetY = mouseY - hedgehog.y;
@@ -71,10 +76,23 @@ class Hedgehog {
     this.isDragging = false;
     this.offsetX = 0;
     this.offsetY = 0;
+    this.isToggled = false;
     // Select image: use imgIndex if provided, else random
-    this.img = images[imgIndex !== undefined ? imgIndex : floor(random(images.length))];
+    this.originalImgIndex = imgIndex !== undefined ? imgIndex : floor(random(images.length));
+    this.img = images[this.originalImgIndex];
     // Log the image assigned to this hedgehog
     console.log(`Hedgehog assigned image: ${this.img.src}`);
+  }
+
+  toggleImage() {
+    if (this.isToggled) {
+      this.img = images[this.originalImgIndex];
+      this.isToggled = false;
+    } else {
+      this.img = hgbImage;
+      this.isToggled = true;
+    }
+    console.log(`Toggled to image: ${this.img.src}`);
   }
 
   update() {
