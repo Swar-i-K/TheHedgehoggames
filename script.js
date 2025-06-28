@@ -58,8 +58,8 @@ class Hedgehog {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.vx = random(-2, 2);
-    this.vy = random(-2, 2);
+    this.vx = random(-3, 3); // Increased initial velocity for more dynamic floating
+    this.vy = random(-3, 3);
     this.size = 50;
     this.isDragging = false;
     this.offsetX = 0;
@@ -82,10 +82,9 @@ class Hedgehog {
         this.vy *= -1;
       }
 
-      // Apply some gravity and friction
-      this.vy += 0.1;
-      this.vx *= 0.99;
-      this.vy *= 0.99;
+      // Reduced friction for smoother floating
+      this.vx *= 0.995;
+      this.vy *= 0.995;
     } else {
       // Drag the hedgehog
       this.x = mouseX - this.offsetX;
