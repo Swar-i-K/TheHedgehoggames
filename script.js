@@ -60,7 +60,7 @@ class Hedgehog {
     this.y = y;
     this.vx = random(-3, 3); // Increased initial velocity for more dynamic floating
     this.vy = random(-3, 3);
-    this.size = 50;
+    this.size = 150;
     this.isDragging = false;
     this.offsetX = 0;
     this.offsetY = 0;
