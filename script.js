@@ -4,18 +4,15 @@ let hgbImage;
 
 function preload() {
   // Load the six hedgehog images and hgb.png
-  try {
-    images.push(loadImage('hg.png'));
-    images.push(loadImage('hg2.png'));
-    images.push(loadImage('hg5.png'));
-    images.push(loadImage('hg6.png'));
-    images.push(loadImage('hg7 (1).png'));
-    images.push(loadImage('hg7 (2).png'));
-    hgbImage = loadImage('hgb.png');
-    console.log(`Loaded ${images.length} main images and hgb.png`);
-  } catch (e) {
-    console.error('Error loading images:', e);
-  }
+  images.push(loadImage('hg.png'));
+  images.push(loadImage('hg2.png'));
+  images.push(loadImage('hg5.png'));
+  images.push(loadImage('hg6.png'));
+  images.push(loadImage('hg7 (1).png'));
+  images.push(loadImage('hg7 (2).png'));
+  hgbImage = loadImage('hgb.png');
+  // Log to confirm images loaded
+  console.log(`Loaded ${images.length} main images and hgb.png`);
 }
 
 function setup() {
@@ -39,34 +36,18 @@ function mousePressed() {
     if (hedgehog.isMouseOver()) {
       // Toggle image on click
       hedgehog.toggleImage();
-      // Mark for potential dragging
-      hedgehog.isClicked = true;
-      hedgehog.clickX = mouseX;
-      hedgehog.clickY = mouseY;
+      // Enable dragging
+      hedgehog.isDragging = true;
       hedgehog.offsetX = mouseX - hedgehog.x;
       hedgehog.offsetY = mouseY - hedgehog.y;
     }
   }
 }
 
-function mouseDragged() {
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isClicked) {
-      // Start dragging only if mouse moves significantly
-      let dx = mouseX - hedgehog.clickX;
-      let dy = mouseY - hedgehog.clickY;
-      if (sqrt(dx * dx + dy * dy) > 5) { // Threshold for drag detection
-        hedgehog.isDragging = true;
-      }
-    }
-  }
-}
-
 function mouseReleased() {
   for (let hedgehog of hedgehogs) {
-    if (hedgehog.isDragging || hedgehog.isClicked) {
+    if (hedgehog.isDragging) {
       hedgehog.isDragging = false;
-      hedgehog.isClicked = false;
       // Restore random velocity to resume floating
       hedgehog.vx = random(-9, 9);
       hedgehog.vy = random(-9, 9);
@@ -93,11 +74,8 @@ class Hedgehog {
     this.vy = random(-9, 9);
     this.size = 150;
     this.isDragging = false;
-    this.isClicked = false;
     this.offsetX = 0;
     this.offsetY = 0;
-    this.clickX = 0;
-    this.clickY = 0;
     this.isToggled = false;
     // Select image: use imgIndex if provided, else random
     this.originalImgIndex = imgIndex !== undefined ? imgIndex : floor(random(images.length));
