@@ -1,24 +1,25 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: #f0f0f0;
-  font-family: Arial, sans-serif;
-}
-
-#canvas-container {
-  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   height: 100vh;
-  position: relative;
+  background-color: #f0f0f0;
 }
-
-canvas {
-  display: block;
-}
-
-#score {
+#rainButton {
   position: absolute;
   top: 10px;
-  left: 10px;
-  font-size: 24px;
-  color: #333;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 10;
+}
+#rainButton:hover {
+  background-color: #e65b50;
 }
