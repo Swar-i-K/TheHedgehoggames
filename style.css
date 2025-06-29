@@ -5,5 +5,25 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #f0f0f0;
+  position: relative;
+  width: 100vw;
+}
+
+body.jungle-background::before {
+  content: '';
+  position: fixed; /* Cover entire viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--color1), var(--color2), transparent);
+  filter: blur(20px); /* Bokeh effect */
+  z-index: -1; /* Behind canvas */
+  opacity: 0.8; /* Soft, aesthetic tone */
+}
+
+canvas {
+  display: block;
+  z-index: 1; /* Above background */
+  background: transparent !important; /* Force transparency */
 }
