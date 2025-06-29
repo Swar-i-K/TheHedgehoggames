@@ -10,30 +10,30 @@ body {
 }
 #rainButton {
   position: absolute;
-  top: 20px;
-  padding: 20px 40px; /* Larger padding */
-  font-size: 28px; /* Larger font size */
+  top: 25px; /* Adjusted for larger size */
+  padding: 20px 50px; /* Larger padding */
+  font-size: 30px; /* Larger font size */
   font-weight: bold;
   background-color: #ff6f61;
   color: white;
   border: none;
-  border-radius: 10px; /* Rounder corners */
+  border-radius: 12px; /* Smoother corners */
   cursor: pointer;
   z-index: 10;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-  animation: colorCycle 2s infinite; /* Faster color cycle */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+  animation: colorCycle 3s infinite; /* Colorful animation */
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 #rainButton:hover {
-  transform: scale(1.15) rotate(2deg); /* Scale and slight rotation on hover */
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); /* Glowing effect on hover */
+  transform: scale(1.2) rotate(3deg); /* Stronger scale and rotation */
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.9); /* Bright glow on hover */
   background-color: #e65b50; /* Fallback color */
 }
 @keyframes colorCycle {
-  0% { background-color: #ff6f61; box-shadow: 0 0 10px #ff6f61; } /* Red */
-  20% { background-color: #ffb347; box-shadow: 0 0 10px #ffb347; } /* Orange */
-  40% { background-color: #ffeb3b; box-shadow: 0 0 10px #ffeb3b; } /* Yellow */
-  60% { background-color: #4caf50; box-shadow: 0 0 10px #4caf50; } /* Green */
-  80% { background-color: #2196f3; box-shadow: 0 0 10px #2196f3; } /* Blue */
-  100% { background-color: #ff6f61; box-shadow: 0 0 10px #ff6f61; } /* Back to Red */
+  0% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; } /* Brighter Red */
+  20% { background-color: #ff9933; box-shadow: 0 0 15px #ff9933; } /* Brighter Orange */
+  40% { background-color: #ffff66; box-shadow: 0 0 15px #ffff66; } /* Brighter Yellow */
+  60% { background-color: #33cc33; box-shadow: 0 0 15px #33cc33; } /* Brighter Green */
+  80% { background-color: #3399ff; box-shadow: 0 0 15px #3399ff; } /* Brighter Blue */
+  100% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; } /* Back to Red */
 }
