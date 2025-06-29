@@ -1,20 +1,15 @@
 let hedgehogs = [];
 let images = [];
-let hgbImage;
+let buttonHovered = false;
 
 function preload() {
-  try {
-    images.push(loadImage('hg.png'));
-    images.push(loadImage('hg2.png'));
-    images.push(loadImage('hg5.png'));
-    images.push(loadImage('hg6.png'));
-    images.push(loadImage('hg7 (1).png'));
-    images.push(loadImage('hg7 (2).png'));
-    hgbImage = loadImage('hgb.png');
-    console.log(`Loaded ${images.length} main images and hgb.png`);
-  } catch (e) {
-    console.error('Error loading images:', e);
-  }
+  images.push(loadImage('hg.png'));
+  images.push(loadImage('hg2.png'));
+  images.push(loadImage('hg5.png'));
+  images.push(loadImage('hg6.png'));
+  images.push(loadImage('hg7 (1).png'));
+  images.push(loadImage('hg7 (2).png'));
+  console.log(`Loaded ${images.length} images`);
 }
 
 function setup() {
@@ -26,6 +21,29 @@ function setup() {
 
 function draw() {
   background(240);
+
+  // Draw button
+  const buttonWidth = 200;
+  const buttonHeight = 50;
+  const buttonX = width / 2 - buttonWidth / 2;
+  const buttonY = 20;
+
+  // Check if mouse is over button
+  buttonHovered = mouseX > buttonX && mouseX < buttonX + buttonWidth &&
+                 mouseY > buttonY && mouseY < buttonY + buttonHeight;
+
+  // Button style
+  fill(buttonHovered ? '#1976D2' : '#2196F3'); // Blue, darker when hovered
+  noStroke();
+  rect(buttonX, buttonY, buttonWidth, buttonHeight, 10); // Rounded corners
+
+  // Button text
+  fill(255); // White text
+  textAlign(CENTER, CENTER);
+  textSize(18);
+  textStyle(BOLD);
+  text('MAKE IT RAIN!', buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
+
   for (let hedgehog of hedgehogs) {
     hedgehog.update();
     hedgehog.display();
@@ -33,25 +51,20 @@ function draw() {
 }
 
 function mousePressed() {
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isMouseOver()) {
-      hedgehog.toggleImage();
-      hedgehog.isClicked = true;
-      hedgehog.clickX = mouseX;
-      hedgehog.clickY = mouseY;
-      hedgehog.offsetX = mouseX - hedgehog.x;
-      hedgehog.offsetY = mouseY - hedgehog.y;
-    }
-  }
-}
+  const buttonWidth = 200;
+  const buttonHeight = 50;
+  const buttonX = width / 2 - buttonWidth / 2;
+  const buttonY = 20;
 
-function mouseDragged() {
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isClicked) {
-      let dx = mouseX - hedgehog.clickX;
-      let dy = mouseY - hedgehog.clickY;
-      if (sqrt(dx * dx + dy * dy) > 5) {
+  if (mouseX > buttonX && mouseX < buttonX + buttonWidth &&
+      mouseY > buttonY && mouseY < buttonY + buttonHeight) {
+    addHedgehogs();
+  } else {
+    for (let hedgehog of hedgehogs) {
+      if (hedgehog.isMouseOver()) {
         hedgehog.isDragging = true;
+        hedgehog.offsetX = mouseX - hedgehog.x;
+        hedgehog.offsetY = mouseY - hedgehog.y;
       }
     }
   }
@@ -59,9 +72,8 @@ function mouseDragged() {
 
 function mouseReleased() {
   for (let hedgehog of hedgehogs) {
-    if (hedgehog.isDragging || hedgehog.isClicked) {
+    if (hedgehog.isDragging) {
       hedgehog.isDragging = false;
-      hedgehog.isClicked = false;
       hedgehog.vx = random(-9, 9);
       hedgehog.vy = random(-9, 9);
     }
@@ -86,34 +98,13 @@ class Hedgehog {
     this.vy = random(-9, 9);
     this.size = 150;
     this.isDragging = false;
-    this.isClicked = false;
     this.offsetX = 0;
     this.offsetY = 0;
-    this.clickX = 0;
-    this.clickY = 0;
-    this.isToggled = false;
-    this.toggleTime = 0;
-    this.originalImgIndex = imgIndex !== undefined ? imgIndex : floor(random(images.length));
-    this.img = images[this.originalImgIndex];
+    this.img = images[imgIndex !== undefined ? imgIndex : floor(random(images.length))];
     console.log(`Hedgehog assigned image: ${this.img.src}`);
   }
 
-  toggleImage() {
-    if (!this.isToggled) {
-      this.img = hgbImage;
-      this.isToggled = true;
-      this.toggleTime = millis();
-      console.log(`Toggled to hgb.png at ${this.toggleTime}ms: ${this.img.src}`);
-    }
-  }
-
   update() {
-    if (this.isToggled && millis() - this.toggleTime > 1000) {
-      this.img = images[this.originalImgIndex];
-      this.isToggled = false;
-      console.log(`Reverted to original image at ${millis()}ms: ${this.img.src}`);
-    }
-
     if (!this.isDragging) {
       this.x += this.vx;
       this.y += this.vy;
@@ -129,7 +120,6 @@ class Hedgehog {
       this.vx = 0;
       this.vy = 0;
     }
-
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
   }
