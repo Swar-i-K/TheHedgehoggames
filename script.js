@@ -1,6 +1,7 @@
 let hedgehogs = [];
 let images = [];
 let imagesLoaded = [];
+let toggleImg;
 
 function preload() {
   const imagePaths = [
@@ -24,7 +25,17 @@ function preload() {
         }
       );
     });
-    console.log(`Attempted to load ${imagePaths.length} images`);
+    toggleImg = loadImage('./hgb.png', 
+      () => {
+        console.log('Loaded toggle image: ./hgb.png');
+        imagesLoaded[images.length] = true;
+      },
+      (err) => {
+        console.error('Failed to load toggle image: ./hgb.png', err);
+        imagesLoaded[images.length] = false;
+      }
+    );
+    console.log(`Attempted to load ${imagePaths.length + 1} images`);
   } catch (err) {
     console.error('Error in preload:', err);
   }
@@ -50,11 +61,20 @@ function draw() {
 }
 
 function mousePressed() {
+  let anyDragging = false;
   for (let hedgehog of hedgehogs) {
     if (hedgehog.isMouseOver()) {
       hedgehog.isDragging = true;
       hedgehog.offsetX = mouseX - hedgehog.x;
       hedgehog.offsetY = mouseY - hedgehog.y;
+      anyDragging = true;
+    }
+  }
+  if (!anyDragging) {
+    for (let hedgehog of hedgehogs) {
+      if (hedgehog.isMouseOver()) {
+        hedgehog.toggleImage();
+      }
     }
   }
 }
@@ -83,8 +103,11 @@ class Hedgehog {
     this.isDragging = false;
     this.offsetX = 0;
     this.offsetY = 0;
-    this.img = images[imgIndex !== undefined ? imgIndex : floor(random(images.length))];
-    console.log(`Hedgehog assigned image: ${this.img.src}`);
+    this.originalImg = images[imgIndex !== undefined ? imgIndex : floor(random(images.length))];
+    this.img = this.originalImg;
+    this.isToggled = false;
+    this.toggleTime = 0;
+    console.log(`Hedgehog assigned image: ${this.originalImg.src}`);
   }
 
   update() {
@@ -105,10 +128,16 @@ class Hedgehog {
     }
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
+
+    // Revert to original image after 2000ms (2 seconds)
+    if (this.isToggled && millis() - this.toggleTime > 2000) {
+      this.isToggled = false;
+      this.img = this.originalImg;
+    }
   }
 
   display() {
-    if (this.img && imagesLoaded[images.indexOf(this.img)]) {
+    if (this.img && imagesLoaded[images.indexOf(this.originalImg) || images.length]) {
       image(this.img, this.x, this.y, this.size, this.size);
     } else {
       fill(255, 0, 0); // Red rectangle fallback
@@ -119,5 +148,13 @@ class Hedgehog {
   isMouseOver() {
     return mouseX > this.x && mouseX < this.x + this.size &&
            mouseY > this.y && mouseY < this.y + this.size;
+  }
+
+  toggleImage() {
+    if (!this.isDragging) {
+      this.isToggled = true;
+      this.img = toggleImg;
+      this.toggleTime = millis();
+    }
   }
 }
