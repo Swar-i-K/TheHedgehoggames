@@ -118,7 +118,7 @@ class Hedgehog {
 
   update() {
     // Check toggle timer even during dragging
-    if (this.isToggled && millis() - this.toggleTime > 1000) {
+    if (this.isToggled && millis() - this.toggleTime > 2000) {
       this.img = images[this.originalImgIndex];
       this.isToggled = false;
       console.log(`Reverted to original image at ${millis()}ms: ${this.img.src}`);
