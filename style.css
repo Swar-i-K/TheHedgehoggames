@@ -10,30 +10,30 @@ body {
 }
 #rainButton {
   position: absolute;
-  top: 25px; /* Adjusted for larger size */
-  padding: 20px 50px; /* Larger padding */
-  font-size: 30px; /* Larger font size */
+  top: 25px;
+  padding: 20px 50px;
+  font-size: 30px;
   font-weight: bold;
-  background-color: #ff6f61;
+  background-color: #ff4d4d;
   color: white;
   border: none;
-  border-radius: 12px; /* Smoother corners */
+  border-radius: 12px;
   cursor: pointer;
   z-index: 10;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-  animation: colorCycle 3s infinite; /* Colorful animation */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  animation: colorCycle 3s infinite;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 #rainButton:hover {
-  transform: scale(1.2) rotate(3deg); /* Stronger scale and rotation */
-  box-shadow: 0 0 25px rgba(255, 255, 255, 0.9); /* Bright glow on hover */
-  background-color: #e65b50; /* Fallback color */
+  transform: scale(1.2) rotate(3deg);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+  background-color: #e65b50;
 }
 @keyframes colorCycle {
-  0% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; } /* Brighter Red */
-  20% { background-color: #ff9933; box-shadow: 0 0 15px #ff9933; } /* Brighter Orange */
-  40% { background-color: #ffff66; box-shadow: 0 0 15px #ffff66; } /* Brighter Yellow */
-  60% { background-color: #33cc33; box-shadow: 0 0 15px #33cc33; } /* Brighter Green */
-  80% { background-color: #3399ff; box-shadow: 0 0 15px #3399ff; } /* Brighter Blue */
-  100% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; } /* Back to Red */
+  0% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
+  20% { background-color: #ff9933; box-shadow: 0 0 15px #ff9933; }
+  40% { background-color: #ffff66; box-shadow: 0 0 15px #ffff66; }
+  60% { background-color: #33cc33; box-shadow: 0 0 15px #33cc33; }
+  80% { background-color: #3399ff; box-shadow: 0 0 15px #3399ff; }
+  100% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
 }
