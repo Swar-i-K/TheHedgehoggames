@@ -10,29 +10,30 @@ body {
 }
 #rainButton {
   position: absolute;
-  top: 30px; /* Adjusted for larger size */
-  padding: 25px 60px; /* Larger padding */
-  font-size: 36px; /* Larger font size */
+  right: 30px; /* Moved to right side */
+  top: 30px;
+  padding: 30px 70px; /* Larger padding */
+  font-size: 42px; /* Larger font size */
   font-weight: bold;
   background-color: #ff4d4d;
   color: white;
   border: none;
-  border-radius: 14px; /* Smoother corners */
+  border-radius: 16px; /* Smoother corners */
   cursor: pointer;
   z-index: 10;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  animation: colorCycle 2.5s infinite, pulse 2.5s infinite; /* Faster cycle + pulse */
+  animation: colorCycle 2.5s infinite, pulse 2.5s infinite;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 #rainButton:hover {
-  transform: scale(1.25) rotate(5deg); /* Stronger scale and rotation */
-  box-shadow: 0 0 30px rgba(255, 255, 255, 1); /* Stronger glow */
-  animation: bounce 0.3s ease-in-out; /* Bounce on hover */
+  transform: scale(1.25) rotate(5deg);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 1);
+  animation: bounce 0.3s ease-in-out;
 }
 @keyframes colorCycle {
   0% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; color: white; }
   20% { background-color: #ff9933; box-shadow: 0 0 15px #ff9933; color: white; }
-  40% { background-color: #ffff66; box-shadow: 0 0 15px #ffff66; color: black; } /* Black text on yellow */
+  40% { background-color: #ffff66; box-shadow: 0 0 15px #ffff66; color: black; }
   60% { background-color: #33cc33; box-shadow: 0 0 15px #33cc33; color: white; }
   80% { background-color: #3399ff; box-shadow: 0 0 15px #3399ff; color: white; }
   100% { background-color: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; color: white; }
