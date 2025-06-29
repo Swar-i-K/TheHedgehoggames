@@ -2,20 +2,17 @@ let hedgehogs = [];
 let images = [];
 
 function preload() {
-  // Load the six hedgehog images
   images.push(loadImage('hg.png'));
   images.push(loadImage('hg2.png'));
   images.push(loadImage('hg5.png'));
   images.push(loadImage('hg6.png'));
   images.push(loadImage('hg7 (1).png'));
   images.push(loadImage('hg7 (2).png'));
-  // Log to confirm images loaded
   console.log(`Loaded ${images.length} images`);
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  // Create one hedgehog for each image
   images.forEach((img, i) => {
     hedgehogs.push(new Hedgehog(random(width), random(height), i));
   });
@@ -43,7 +40,6 @@ function mouseReleased() {
   for (let hedgehog of hedgehogs) {
     if (hedgehog.isDragging) {
       hedgehog.isDragging = false;
-      // Restore random velocity to resume floating
       hedgehog.vx = random(-9, 9);
       hedgehog.vy = random(-9, 9);
     }
@@ -64,19 +60,14 @@ class Hedgehog {
     this.isDragging = false;
     this.offsetX = 0;
     this.offsetY = 0;
-    // Select image: use imgIndex if provided, else random
     this.img = images[imgIndex !== undefined ? imgIndex : floor(random(images.length))];
-    // Log the image assigned to this hedgehog
     console.log(`Hedgehog assigned image: ${this.img.src}`);
   }
 
   update() {
     if (!this.isDragging) {
-      // Update position
       this.x += this.vx;
       this.y += this.vy;
-
-      // Bounce off walls
       if (this.x < 0 || this.x > width - this.size) {
         this.vx *= -1;
       }
@@ -84,14 +75,11 @@ class Hedgehog {
         this.vy *= -1;
       }
     } else {
-      // Drag the hedgehog
       this.x = mouseX - this.offsetX;
       this.y = mouseY - this.offsetY;
       this.vx = 0;
       this.vy = 0;
     }
-
-    // Keep within canvas
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
   }
