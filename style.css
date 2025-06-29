@@ -28,7 +28,7 @@ canvas {
   background: transparent !important;
 }
 
-#rainButton {
+#prickleButton {
   position: fixed;
   top: 10px;
   left: 10px;
@@ -40,8 +40,13 @@ canvas {
   border-radius: 5px;
   cursor: pointer;
   z-index: 2;
+  touch-action: manipulation; /* Prevent mobile zoom/scroll */
 }
 
-#rainButton:hover {
+#prickleButton:hover {
   background-color: rgb(107, 142, 35); /* Olive */
+}
+
+#prickleButton:active {
+  background-color: rgb(47, 79, 79); /* Muted Teal */
 }
