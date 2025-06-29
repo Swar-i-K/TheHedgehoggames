@@ -3,7 +3,6 @@ let images = [];
 let hgbImage;
 
 function preload() {
-  // Load the six hedgehog images and hgb.png
   try {
     images.push(loadImage('hg.png'));
     images.push(loadImage('hg2.png'));
@@ -20,7 +19,6 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  // Create one hedgehog for each image
   images.forEach((img, i) => {
     hedgehogs.push(new Hedgehog(random(width), random(height), i));
   });
@@ -37,9 +35,7 @@ function draw() {
 function mousePressed() {
   for (let hedgehog of hedgehogs) {
     if (hedgehog.isMouseOver()) {
-      // Toggle image to hgb.png on click
       hedgehog.toggleImage();
-      // Mark for potential dragging
       hedgehog.isClicked = true;
       hedgehog.clickX = mouseX;
       hedgehog.clickY = mouseY;
@@ -52,7 +48,6 @@ function mousePressed() {
 function mouseDragged() {
   for (let hedgehog of hedgehogs) {
     if (hedgehog.isClicked) {
-      // Start dragging only if mouse moves significantly
       let dx = mouseX - hedgehog.clickX;
       let dy = mouseY - hedgehog.clickY;
       if (sqrt(dx * dx + dy * dy) > 5) {
@@ -67,7 +62,6 @@ function mouseReleased() {
     if (hedgehog.isDragging || hedgehog.isClicked) {
       hedgehog.isDragging = false;
       hedgehog.isClicked = false;
-      // Restore random velocity to resume floating
       hedgehog.vx = random(-9, 9);
       hedgehog.vy = random(-9, 9);
     }
@@ -79,7 +73,6 @@ function windowResized() {
 }
 
 function addHedgehogs() {
-  // Add 3 more hedgehogs at random positions
   for (let i = 0; i < 3; i++) {
     hedgehogs.push(new Hedgehog(random(width), random(height)));
   }
@@ -100,10 +93,8 @@ class Hedgehog {
     this.clickY = 0;
     this.isToggled = false;
     this.toggleTime = 0;
-    // Select image: use imgIndex if provided, else random
     this.originalImgIndex = imgIndex !== undefined ? imgIndex : floor(random(images.length));
     this.img = images[this.originalImgIndex];
-    // Log the image assigned to this hedgehog
     console.log(`Hedgehog assigned image: ${this.img.src}`);
   }
 
@@ -117,19 +108,15 @@ class Hedgehog {
   }
 
   update() {
-    // Check toggle timer even during dragging
-    if (this.isToggled && millis() - this.toggleTime > 2000) {
+    if (this.isToggled && millis() - this.toggleTime > 1000) {
       this.img = images[this.originalImgIndex];
       this.isToggled = false;
       console.log(`Reverted to original image at ${millis()}ms: ${this.img.src}`);
     }
 
     if (!this.isDragging) {
-      // Update position
       this.x += this.vx;
       this.y += this.vy;
-
-      // Bounce off walls
       if (this.x < 0 || this.x > width - this.size) {
         this.vx *= -1;
       }
@@ -137,14 +124,12 @@ class Hedgehog {
         this.vy *= -1;
       }
     } else {
-      // Drag the hedgehog
       this.x = mouseX - this.offsetX;
       this.y = mouseY - this.offsetY;
       this.vx = 0;
       this.vy = 0;
     }
 
-    // Keep within canvas
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
   }
