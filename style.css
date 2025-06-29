@@ -1,177 +1,40 @@
-let hedgehogs = [];
-let images = [];
-let hgbImage;
-
-// Button constants
-const BUTTON_WIDTH = 80;
-const BUTTON_HEIGHT = 30;
-const BUTTON_MARGIN = 10;
-
-function preload() {
-  try {
-    images.push(loadImage('hg.png'));
-    images.push(loadImage('hg2.png'));
-    images.push(loadImage('hg5.png'));
-    images.push(loadImage('hg6.png'));
-    images.push(loadImage('hg7 (1).png'));
-    images.push(loadImage('hg7 (2).png'));
-    hgbImage = loadImage('hgb.png');
-    console.log(`Loaded ${images.length} main images and hgb.png`);
-  } catch (e) {
-    console.error('Error loading images:', e);
-  }
+body {
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f0f0f0;
 }
-
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  images.forEach((img, i) => {
-    hedgehogs.push(new Hedgehog(random(width), random(height), i));
-  });
+#rainButton {
+  position: absolute;
+  right: 30px; /* Positioned on right side */
+  top: 30px;
+  padding: 40px 90px; /* Large padding */
+  font-size: 50px; /* Large font size */
+  font-weight: bold;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+  animation: colorCycle 2.5s infinite;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
-
-function draw() {
-  background(240);
-  for (let hedgehog of hedgehogs) {
-    hedgehog.update();
-    hedgehog.display();
-  }
-
-  // Draw the "MORE!" button
-  let buttonX = width - BUTTON_WIDTH - BUTTON_MARGIN;
-  let buttonY = BUTTON_MARGIN;
-  fill(255, 0, 0);
-  rect(buttonX, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT);
-  fill(255);
-  textAlign(CENTER, CENTER);
-  text("MORE!", buttonX + BUTTON_WIDTH / 2, buttonY + BUTTON_HEIGHT / 2);
-
-  // Change cursor when hovering over the button
-  if (isMouseOverButton()) {
-    cursor(HAND);
-  } else {
-    cursor(ARROW);
-  }
+#rainButton:hover {
+  transform: scale(1.3);
+  box-shadow: 0 0 40px rgba(255, 255, 255, 1);
+  background-color: #e65b50;
 }
-
-function mousePressed() {
-  if (isMouseOverButton()) {
-    addHedgehogs();
-  } else {
-    for (let hedgehog of hedgehogs) {
-      if (hedgehog.isMouseOver()) {
-        hedgehog.toggleImage();
-        hedgehog.isClicked = true;
-        hedgehog.clickX = mouseX;
-        hedgehog.clickY = mouseY;
-        hedgehog.offsetX = mouseX - hedgehog.x;
-        hedgehog.offsetY = mouseY - hedgehog.y;
-      }
-    }
-  }
-}
-
-function mouseDragged() {
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isClicked) {
-      let dx = mouseX - hedgehog.clickX;
-      let dy = mouseY - hedgehog.clickY;
-      if (sqrt(dx * dx + dy * dy) > 5) {
-        hedgehog.isDragging = true;
-      }
-    }
-  }
-}
-
-function mouseReleased() {
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isDragging || hedgehog.isClicked) {
-      hedgehog.isDragging = false;
-      hedgehog.isClicked = false;
-      hedgehog.vx = random(-9, 9);
-      hedgehog.vy = random(-9, 9);
-    }
-  }
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}
-
-function addHedgehogs() {
-  for (let i = 0; i < 3; i++) {
-    hedgehogs.push(new Hedgehog(random(width), random(height)));
-  }
-}
-
-function isMouseOverButton() {
-  let buttonX = width - BUTTON_WIDTH - BUTTON_MARGIN;
-  let buttonY = BUTTON_MARGIN;
-  return mouseX > buttonX && mouseX < buttonX + BUTTON_WIDTH &&
-         mouseY > buttonY && mouseY < buttonY + BUTTON_HEIGHT;
-}
-
-class Hedgehog {
-  constructor(x, y, imgIndex) {
-    this.x = x;
-    this.y = y;
-    this.vx = random(-9, 9);
-    this.vy = random(-9, 9);
-    this.size = 150;
-    this.isDragging = false;
-    this.isClicked = false;
-    this.offsetX = 0;
-    this.offsetY = 0;
-    this.clickX = 0;
-    this.clickY = 0;
-    this.isToggled = false;
-    this.toggleTime = 0;
-    this.originalImgIndex = imgIndex !== undefined ? imgIndex : floor(random(images.length));
-    this.img = images[this.originalImgIndex];
-    console.log(`Hedgehog assigned image: ${this.img.src}`);
-  }
-
-  toggleImage() {
-    if (!this.isToggled) {
-      this.img = hgbImage;
-      this.isToggled = true;
-      this.toggleTime = millis();
-      console.log(`Toggled to hgb.png at ${this.toggleTime}ms: ${this.img.src}`);
-    }
-  }
-
-  update() {
-    if (this.isToggled && millis() - this.toggleTime > 1000) {
-      this.img = images[this.originalImgIndex];
-      this.isToggled = false;
-      console.log(`Reverted to original image at ${millis()}ms: ${this.img.src}`);
-    }
-
-    if (!this.isDragging) {
-      this.x += this.vx;
-      this.y += this.vy;
-      if (this.x < 0 || this.x > width - this.size) {
-        this.vx *= -1;
-      }
-      if (this.y < 0 || this.y > height - this.size) {
-        this.vy *= -1;
-      }
-    } else {
-      this.x = mouseX - this.offsetX;
-      this.y = mouseY - this.offsetY;
-      this.vx = 0;
-      this.vy = 0;
-    }
-
-    this.x = constrain(this.x, 0, width - this.size);
-    this.y = constrain(this.y, 0, height - this.size);
-  }
-
-  display() {
-    image(this.img, this.x, this.y, this.size, this.size);
-  }
-
-  isMouseOver() {
-    return mouseX > this.x && mouseX < this.x + this.size &&
-           mouseY > this.y && mouseY < this.y + this.size;
-  }
+@keyframes colorCycle {
+  0% { background-color: #ff4d4d; box-shadow: 0 0 20px #ff4d4d; }
+  20% { background-color: #ff9933; box-shadow: 0 0 20px #ff9933; }
+  40% { background-color: #ffff66; box-shadow: 0 0 20px #ffff66; }
+  60% { background-color: #33cc33; box-shadow: 0 0 20px #33cc33; }
+  80% { background-color: #3399ff; box-shadow: 0 0 20px #3399ff; }
+  100% { background-color: #ff4d4d; box-shadow: 0 0 20px #ff4d4d; }
 }
