@@ -42,69 +42,94 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight, P2D); // Use P2D for transparency
+  createCanvas(windowWidth, windowHeight, P2D);
   images.forEach((img, i) => {
     if (imagesLoaded[i]) {
       hedgehogs.push(new Hedgehog(random(width), random(height), i));
     }
+  });
+  // Add "Make It Rain" button event listener
+  let rainButton = document.getElementById('rainButton');
+  rainButton.addEventListener('click', () => {
+    for (let i = 0; i < 7; i++) {
+      let imgIndex = floor(random(images.length));
+      if (imagesLoaded[imgIndex]) {
+        hedgehogs.push(new Hedgehog(random(width), random(height), imgIndex));
+      }
+    }
+    console.log('Make It Rain: Added 7 hedgehogs');
   });
   console.log('Image load status:', imagesLoaded);
   console.log('Repository URL: https://swar-i-k.github.io/TheHedgehoggames/');
 }
 
 function draw() {
-  clear(); // Clear canvas to transparent
+  clear();
   for (let hedgehog of hedgehogs) {
     hedgehog.update();
     hedgehog.display();
   }
 }
 
-function mousePressed() {
-  handleInteraction(mouseX, mouseY, false);
-}
-
-function mouseDragged() {
-  handleInteraction(mouseX, mouseY, true);
+function mouseClicked() {
+  for (let hedgehog of hedgehogs) {
+    if (hedgehog.isMouseOver(mouseX, mouseY) && !hedgehog.isToggled) {
+      hedgehog.toggleImage();
+      console.log('Mouse clicked, toggling to hgb.png');
+      return;
+    }
+  }
 }
 
 function touchStarted() {
   if (touches.length > 0) {
-    handleInteraction(touches[0].x, touches[0].y, false);
-  }
-  return false; // Prevent default touch behavior
-}
-
-function touchMoved() {
-  if (touches.length > 0) {
-    handleInteraction(touches[0].x, touches[0].y, true);
-  }
-  return false;
-}
-
-function handleInteraction(x, y, isDragging) {
-  if (!isDragging) {
-    // Try toggling first for click/tap
+    let x = touches[0].x;
+    let y = touches[0].y;
     for (let hedgehog of hedgehogs) {
       if (hedgehog.isMouseOver(x, y) && !hedgehog.isToggled) {
         hedgehog.toggleImage();
-        console.log('Click/tap detected, toggling to hgb.png');
+        console.log('Touch started, toggling to hgb.png');
         return;
       }
     }
-  }
-  // Handle dragging
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isMouseOver(x, y)) {
-      if (!hedgehog.isDragging) {
+    for (let hedgehog of hedgehogs) {
+      if (hedgehog.isMouseOver(x, y)) {
         hedgehog.isDragging = true;
         hedgehog.offsetX = x - hedgehog.x;
         hedgehog.offsetY = y - hedgehog.y;
         console.log('Started dragging hedgehog');
+        return;
       }
-      return;
     }
   }
+  return false;
+}
+
+function mouseDragged() {
+  for (let hedgehog of hedgehogs) {
+    if (hedgehog.isDragging) {
+      hedgehog.x = mouseX - hedgehog.offsetX;
+      hedgehog.y = mouseY - hedgehog.offsetY;
+      hedgehog.vx = 0;
+      hedgehog.vy = 0;
+      console.log('Dragging hedgehog');
+    }
+  }
+}
+
+function touchMoved() {
+  if (touches.length > 0) {
+    for (let hedgehog of hedgehogs) {
+      if (hedgehog.isDragging) {
+        hedgehog.x = touches[0].x - hedgehog.offsetX;
+        hedgehog.y = touches[0].y - hedgehog.offsetY;
+        hedgehog.vx = 0;
+        hedgehog.vy = 0;
+        console.log('Dragging hedgehog (touch)');
+      }
+    }
+  }
+  return false;
 }
 
 function mouseReleased() {
@@ -154,16 +179,10 @@ class Hedgehog {
       if (this.y < 0 || this.y > height - this.size) {
         this.vy *= -1;
       }
-    } else {
-      this.x = (mouseX || touches[0]?.x || this.x) - this.offsetX;
-      this.y = (mouseY || touches[0]?.y || this.y) - this.offsetY;
-      this.vx = 0;
-      this.vy = 0;
     }
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
 
-    // Revert to original image after 2000ms
     if (this.isToggled && millis() - this.toggleTime > 2000) {
       this.isToggled = false;
       this.img = this.originalImg;
@@ -176,7 +195,7 @@ class Hedgehog {
     if (this.img && (imagesLoaded[images.indexOf(this.originalImg)] || (this.isToggled && imagesLoaded[images.length]))) {
       image(this.img, this.x, this.y, this.size, this.size);
     } else {
-      fill(0, 0, 255); // Blue rectangle fallback
+      fill(0, 0, 255);
       rect(this.x, this.y, this.size, this.size);
       console.log('Using fallback for image display');
     }
