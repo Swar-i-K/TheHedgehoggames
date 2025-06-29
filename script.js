@@ -61,19 +61,35 @@ function draw() {
 }
 
 function mousePressed() {
+  handleInteraction(mouseX, mouseY);
+}
+
+function touchStarted() {
+  // Handle first touch point for mobile
+  if (touches.length > 0) {
+    handleInteraction(touches[0].x, touches[0].y);
+  }
+  return false; // Prevent default touch behavior
+}
+
+function handleInteraction(x, y) {
   let anyDragging = false;
+  // Check for dragging first
   for (let hedgehog of hedgehogs) {
-    if (hedgehog.isMouseOver()) {
+    if (hedgehog.isMouseOver(x, y)) {
       hedgehog.isDragging = true;
-      hedgehog.offsetX = mouseX - hedgehog.x;
-      hedgehog.offsetY = mouseY - hedgehog.y;
+      hedgehog.offsetX = x - hedgehog.x;
+      hedgehog.offsetY = y - hedgehog.y;
       anyDragging = true;
+      break; // Only drag one hedgehog
     }
   }
+  // If not dragging, toggle image
   if (!anyDragging) {
     for (let hedgehog of hedgehogs) {
-      if (hedgehog.isMouseOver()) {
+      if (hedgehog.isMouseOver(x, y)) {
         hedgehog.toggleImage();
+        break; // Only toggle one hedgehog
       }
     }
   }
@@ -87,6 +103,11 @@ function mouseReleased() {
       hedgehog.vy = random(-9, 9);
     }
   }
+}
+
+function touchEnded() {
+  mouseReleased(); // Reuse mouseReleased logic for touch
+  return false;
 }
 
 function windowResized() {
@@ -121,8 +142,8 @@ class Hedgehog {
         this.vy *= -1;
       }
     } else {
-      this.x = mouseX - this.offsetX;
-      this.y = mouseY - this.offsetY;
+      this.x = (mouseX || touches[0]?.x || this.x) - this.offsetX;
+      this.y = (mouseY || touches[0]?.y || this.y) - this.offsetY;
       this.vx = 0;
       this.vy = 0;
     }
@@ -140,21 +161,22 @@ class Hedgehog {
     if (this.img && imagesLoaded[images.indexOf(this.originalImg) || images.length]) {
       image(this.img, this.x, this.y, this.size, this.size);
     } else {
-      fill(255, 0, 0); // Red rectangle fallback
+      fill(0, 0, 255); // Blue rectangle fallback for toggle image
       rect(this.x, this.y, this.size, this.size);
     }
   }
 
-  isMouseOver() {
-    return mouseX > this.x && mouseX < this.x + this.size &&
-           mouseY > this.y && mouseY < this.y + this.size;
+  isMouseOver(x, y) {
+    return x > this.x && x < this.x + this.size &&
+           y > this.y && y < this.y + this.size;
   }
 
   toggleImage() {
-    if (!this.isDragging) {
+    if (!this.isDragging && !this.isToggled) {
       this.isToggled = true;
       this.img = toggleImg;
       this.toggleTime = millis();
+      console.log('Toggled to hgb.png');
     }
   }
 }
