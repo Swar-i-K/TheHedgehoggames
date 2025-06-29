@@ -61,36 +61,48 @@ function draw() {
 }
 
 function mousePressed() {
-  handleInteraction(mouseX, mouseY);
+  handleInteraction(mouseX, mouseY, false);
+}
+
+function mouseDragged() {
+  handleInteraction(mouseX, mouseY, true);
 }
 
 function touchStarted() {
-  // Handle first touch point for mobile
   if (touches.length > 0) {
-    handleInteraction(touches[0].x, touches[0].y);
+    handleInteraction(touches[0].x, touches[0].y, false);
   }
   return false; // Prevent default touch behavior
 }
 
-function handleInteraction(x, y) {
-  let anyDragging = false;
-  // Check for dragging first
-  for (let hedgehog of hedgehogs) {
-    if (hedgehog.isMouseOver(x, y)) {
-      hedgehog.isDragging = true;
-      hedgehog.offsetX = x - hedgehog.x;
-      hedgehog.offsetY = y - hedgehog.y;
-      anyDragging = true;
-      break; // Only drag one hedgehog
+function touchMoved() {
+  if (touches.length > 0) {
+    handleInteraction(touches[0].x, touches[0].y, true);
+  }
+  return false;
+}
+
+function handleInteraction(x, y, isDragging) {
+  if (!isDragging) {
+    // Try toggling first for click/tap
+    for (let hedgehog of hedgehogs) {
+      if (hedgehog.isMouseOver(x, y) && !hedgehog.isToggled) {
+        hedgehog.toggleImage();
+        console.log('Click/tap detected, toggling to hgb.png');
+        return;
+      }
     }
   }
-  // If not dragging, toggle image
-  if (!anyDragging) {
-    for (let hedgehog of hedgehogs) {
-      if (hedgehog.isMouseOver(x, y)) {
-        hedgehog.toggleImage();
-        break; // Only toggle one hedgehog
+  // Handle dragging
+  for (let hedgehog of hedgehogs) {
+    if (hedgehog.isMouseOver(x, y)) {
+      if (!hedgehog.isDragging) {
+        hedgehog.isDragging = true;
+        hedgehog.offsetX = x - hedgehog.x;
+        hedgehog.offsetY = y - hedgehog.y;
+        console.log('Started dragging hedgehog');
       }
+      return;
     }
   }
 }
@@ -101,12 +113,13 @@ function mouseReleased() {
       hedgehog.isDragging = false;
       hedgehog.vx = random(-9, 9);
       hedgehog.vy = random(-9, 9);
+      console.log('Released hedgehog, new velocities set');
     }
   }
 }
 
 function touchEnded() {
-  mouseReleased(); // Reuse mouseReleased logic for touch
+  mouseReleased();
   return false;
 }
 
@@ -150,33 +163,34 @@ class Hedgehog {
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
 
-    // Revert to original image after 2000ms (2 seconds)
+    // Revert to original image after 2000ms
     if (this.isToggled && millis() - this.toggleTime > 2000) {
       this.isToggled = false;
       this.img = this.originalImg;
+      console.log('Reverted to original image');
     }
   }
 
   display() {
-    if (this.img && imagesLoaded[images.indexOf(this.originalImg) || images.length]) {
+    imageMode(CORNER);
+    if (this.img && (imagesLoaded[images.indexOf(this.originalImg)] || (this.isToggled && imagesLoaded[images.length]))) {
       image(this.img, this.x, this.y, this.size, this.size);
     } else {
-      fill(0, 0, 255); // Blue rectangle fallback for toggle image
+      fill(0, 0, 255); // Blue rectangle fallback
       rect(this.x, this.y, this.size, this.size);
+      console.log('Using fallback for image display');
     }
   }
 
   isMouseOver(x, y) {
-    return x > this.x && x < this.x + this.size &&
-           y > this.y && y < this.y + this.size;
+    return x >= this.x && x <= this.x + this.size &&
+           y >= this.y && y <= this.y + this.size;
   }
 
   toggleImage() {
-    if (!this.isDragging && !this.isToggled) {
-      this.isToggled = true;
-      this.img = toggleImg;
-      this.toggleTime = millis();
-      console.log('Toggled to hgb.png');
-    }
+    this.isToggled = true;
+    this.img = toggleImg;
+    this.toggleTime = millis();
+    console.log('Toggled to hgb.png');
   }
 }
