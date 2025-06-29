@@ -1,19 +1,21 @@
 let hedgehogs = [];
 let images = [];
-let buttonHovered = false;
 
 function preload() {
+  // Load the six hedgehog images
   images.push(loadImage('hg.png'));
   images.push(loadImage('hg2.png'));
   images.push(loadImage('hg5.png'));
   images.push(loadImage('hg6.png'));
   images.push(loadImage('hg7 (1).png'));
   images.push(loadImage('hg7 (2).png'));
+  // Log to confirm images loaded
   console.log(`Loaded ${images.length} images`);
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  // Create one hedgehog for each image
   images.forEach((img, i) => {
     hedgehogs.push(new Hedgehog(random(width), random(height), i));
   });
@@ -21,29 +23,6 @@ function setup() {
 
 function draw() {
   background(240);
-
-  // Draw button
-  const buttonWidth = 200;
-  const buttonHeight = 50;
-  const buttonX = width / 2 - buttonWidth / 2;
-  const buttonY = 20;
-
-  // Check if mouse is over button
-  buttonHovered = mouseX > buttonX && mouseX < buttonX + buttonWidth &&
-                 mouseY > buttonY && mouseY < buttonY + buttonHeight;
-
-  // Button style
-  fill(buttonHovered ? '#1976D2' : '#2196F3'); // Blue, darker when hovered
-  noStroke();
-  rect(buttonX, buttonY, buttonWidth, buttonHeight, 10); // Rounded corners
-
-  // Button text
-  fill(255); // White text
-  textAlign(CENTER, CENTER);
-  textSize(18);
-  textStyle(BOLD);
-  text('MAKE IT RAIN!', buttonX + buttonWidth / 2, buttonY + buttonHeight / 2);
-
   for (let hedgehog of hedgehogs) {
     hedgehog.update();
     hedgehog.display();
@@ -51,21 +30,11 @@ function draw() {
 }
 
 function mousePressed() {
-  const buttonWidth = 200;
-  const buttonHeight = 50;
-  const buttonX = width / 2 - buttonWidth / 2;
-  const buttonY = 20;
-
-  if (mouseX > buttonX && mouseX < buttonX + buttonWidth &&
-      mouseY > buttonY && mouseY < buttonY + buttonHeight) {
-    addHedgehogs();
-  } else {
-    for (let hedgehog of hedgehogs) {
-      if (hedgehog.isMouseOver()) {
-        hedgehog.isDragging = true;
-        hedgehog.offsetX = mouseX - hedgehog.x;
-        hedgehog.offsetY = mouseY - hedgehog.y;
-      }
+  for (let hedgehog of hedgehogs) {
+    if (hedgehog.isMouseOver()) {
+      hedgehog.isDragging = true;
+      hedgehog.offsetX = mouseX - hedgehog.x;
+      hedgehog.offsetY = mouseY - hedgehog.y;
     }
   }
 }
@@ -74,6 +43,7 @@ function mouseReleased() {
   for (let hedgehog of hedgehogs) {
     if (hedgehog.isDragging) {
       hedgehog.isDragging = false;
+      // Restore random velocity to resume floating
       hedgehog.vx = random(-9, 9);
       hedgehog.vy = random(-9, 9);
     }
@@ -82,12 +52,6 @@ function mouseReleased() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-}
-
-function addHedgehogs() {
-  for (let i = 0; i < 3; i++) {
-    hedgehogs.push(new Hedgehog(random(width), random(height)));
-  }
 }
 
 class Hedgehog {
@@ -100,14 +64,19 @@ class Hedgehog {
     this.isDragging = false;
     this.offsetX = 0;
     this.offsetY = 0;
+    // Select image: use imgIndex if provided, else random
     this.img = images[imgIndex !== undefined ? imgIndex : floor(random(images.length))];
+    // Log the image assigned to this hedgehog
     console.log(`Hedgehog assigned image: ${this.img.src}`);
   }
 
   update() {
     if (!this.isDragging) {
+      // Update position
       this.x += this.vx;
       this.y += this.vy;
+
+      // Bounce off walls
       if (this.x < 0 || this.x > width - this.size) {
         this.vx *= -1;
       }
@@ -115,11 +84,14 @@ class Hedgehog {
         this.vy *= -1;
       }
     } else {
+      // Drag the hedgehog
       this.x = mouseX - this.offsetX;
       this.y = mouseY - this.offsetY;
       this.vx = 0;
       this.vy = 0;
     }
+
+    // Keep within canvas
     this.x = constrain(this.x, 0, width - this.size);
     this.y = constrain(this.y, 0, height - this.size);
   }
