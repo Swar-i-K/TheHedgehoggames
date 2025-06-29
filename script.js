@@ -48,16 +48,26 @@ function setup() {
       hedgehogs.push(new Hedgehog(random(width), random(height), i));
     }
   });
-  // Add "Make It Rain" button event listener
-  let rainButton = document.getElementById('rainButton');
-  rainButton.addEventListener('click', () => {
+  // Add event listeners for "Get a Prickle!" button
+  let prickleButton = document.getElementById('prickleButton');
+  prickleButton.addEventListener('click', () => {
     for (let i = 0; i < 7; i++) {
       let imgIndex = floor(random(images.length));
       if (imagesLoaded[imgIndex]) {
         hedgehogs.push(new Hedgehog(random(width), random(height), imgIndex));
       }
     }
-    console.log('Make It Rain: Added 7 hedgehogs');
+    console.log('Get a Prickle: Added 7 hedgehogs (click)');
+  });
+  prickleButton.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent default touch behavior
+    for (let i = 0; i < 7; i++) {
+      let imgIndex = floor(random(images.length));
+      if (imagesLoaded[imgIndex]) {
+        hedgehogs.push(new Hedgehog(random(width), random(height), imgIndex));
+      }
+    }
+    console.log('Get a Prickle: Added 7 hedgehogs (touch)');
   });
   console.log('Image load status:', imagesLoaded);
   console.log('Repository URL: https://swar-i-k.github.io/TheHedgehoggames/');
