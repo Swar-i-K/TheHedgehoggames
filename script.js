@@ -1,25 +1,48 @@
 let hedgehogs = [];
 let images = [];
+let imagesLoaded = [];
 
 function preload() {
-  images.push(loadImage('hg.png'));
-  images.push(loadImage('hg2.png'));
-  images.push(loadImage('hg5.png'));
-  images.push(loadImage('hg6.png'));
-  images.push(loadImage('hg7 (1).png'));
-  images.push(loadImage('hg7 (2).png'));
-  console.log(`Loaded ${images.length} images`);
+  const imagePaths = [
+    './hg.png',
+    './hg2.png',
+    './hg5.png',
+    './hg6.png',
+    './hg7 (1).png',
+    './hg7 (2).png'
+  ];
+  try {
+    imagePaths.forEach((path, i) => {
+      images[i] = loadImage(path, 
+        () => {
+          console.log(`Loaded image: ${path}`);
+          imagesLoaded[i] = true;
+        },
+        (err) => {
+          console.error(`Failed to load image: ${path}`, err);
+          imagesLoaded[i] = false;
+        }
+      );
+    });
+    console.log(`Attempted to load ${imagePaths.length} images`);
+  } catch (err) {
+    console.error('Error in preload:', err);
+  }
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight, P2D); // Use P2D for transparency
   images.forEach((img, i) => {
-    hedgehogs.push(new Hedgehog(random(width), random(height), i));
+    if (imagesLoaded[i]) {
+      hedgehogs.push(new Hedgehog(random(width), random(height), i));
+    }
   });
+  console.log('Image load status:', imagesLoaded);
+  console.log('Repository URL: https://swar-i-k.github.io/TheHedgehoggames/');
 }
 
 function draw() {
-  background(240);
+  clear(); // Clear canvas to transparent
   for (let hedgehog of hedgehogs) {
     hedgehog.update();
     hedgehog.display();
@@ -85,7 +108,12 @@ class Hedgehog {
   }
 
   display() {
-    image(this.img, this.x, this.y, this.size, this.size);
+    if (this.img && imagesLoaded[images.indexOf(this.img)]) {
+      image(this.img, this.x, this.y, this.size, this.size);
+    } else {
+      fill(255, 0, 0); // Red rectangle fallback
+      rect(this.x, this.y, this.size, this.size);
+    }
   }
 
   isMouseOver() {
